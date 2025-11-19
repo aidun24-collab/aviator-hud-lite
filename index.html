@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aviator HUD Pro</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="hud-shell">
+    <header class="hud-header">
+      <div class="logo">✈️</div>
+      <div class="titles">
+        <h1>Aviator HUD Pro</h1>
+        <p>Manual control panel for Helper / High / Ultra reading</p>
+      </div>
+    </header>
+
+    <!-- STATUS PANEL -->
+    <section class="hud-card">
+      <div class="card-head">
+        <h2>Status</h2>
+        <span class="tag tag-status" id="tag-status">IDLE</span>
+      </div>
+      <p class="card-caption">How safe is entry RIGHT NOW?</p>
+      <div class="btn-row" data-group="status">
+        <button class="hud-btn" data-value="SAFE ENTRY" data-type="safe">SAFE ENTRY</button>
+        <button class="hud-btn" data-value="WATCH" data-type="watch">WATCH</button>
+        <button class="hud-btn" data-value="RISKY" data-type="risky">RISKY</button>
+        <button class="hud-btn" data-value="AVOID" data-type="avoid">AVOID</button>
+      </div>
+      <div class="readout">
+        <span>Current:</span>
+        <strong id="status-output">---</strong>
+      </div>
+    </section>
+
+    <!-- CLASS PANEL -->
+    <section class="hud-card">
+      <div class="card-head">
+        <h2>Class</h2>
+        <span class="tag tag-class" id="tag-class">NO FAMILY</span>
+      </div>
+      <p class="card-caption">Which family is currently dominating?</p>
+      <div class="btn-row" data-group="class">
+        <button class="hud-btn" data-value="HELPER" data-type="helper">HELPER</button>
+        <button class="hud-btn" data-value="HIGH" data-type="high">HIGH</button>
+        <button class="hud-btn" data-value="ULTRA" data-type="ultra">ULTRA</button>
+      </div>
+      <div class="readout">
+        <span>Active family:</span>
+        <strong id="class-output">---</strong>
+      </div>
+    </section>
+
+    <!-- MOMENTUM PANEL -->
+    <section class="hud-card">
+      <div class="card-head">
+        <h2>Momentum</h2>
+        <span class="tag tag-momo" id="tag-momo">FLAT</span>
+      </div>
+      <p class="card-caption">What is the current wave direction?</p>
+      <div class="btn-row" data-group="momentum">
+        <button class="hud-btn" data-value="UP" data-type="up">UP</button>
+        <button class="hud-btn" data-value="NEUTRAL" data-type="neutral">NEUTRAL</button>
+        <button class="hud-btn" data-value="DOWN" data-type="down">DOWN</button>
+      </div>
+      <div class="readout">
+        <span>Momentum:</span>
+        <strong id="momentum-output">---</strong>
+      </div>
+    </section>
+
+    <!-- ULTRA / HELPER INFO -->
+    <section class="hud-card highlight">
+      <div class="card-head">
+        <h2>Signal Insight</h2>
+        <span class="tag tag-mode" id="tag-mode">NO SIGNAL</span>
+      </div>
+      <p class="card-caption" id="insight-text">
+        Select Status + Class + Momentum to see a quick interpretation.
+      </p>
+    </section>
+
+    <!-- SUMMARY + HISTORY -->
+    <section class="hud-summary">
+      <h2>Current Snapshot</h2>
+      <p id="summary-line">STATUS: --- • CLASS: --- • MOMENTUM: ---</p>
+      <h3>Last changes</h3>
+      <ul id="history-list" class="history-list">
+        <!-- history rows injected here -->
+      </ul>
+    </section>
+
+    <footer class="hud-footer">
+      <small>Aviator HUD Pro – manual reading tool only. No connection to any betting site or real game.</small>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
