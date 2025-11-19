@@ -1,0 +1,102 @@
+/* HUD PRO — MAIN STYLE */
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #0a0a0a;
+  color: #fff;
+  padding: 20px;
+}
+
+.hud-shell {
+  max-width: 900px;
+  margin: auto;
+}
+
+.hud-header {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.logo {
+  font-size: 30px;
+}
+
+.titles h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.card {
+  background: #111;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.card-caption {
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.tag {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tag-status {
+  background: #222;
+  color: #05ffb0;
+}
+
+.tag-danger {
+  background: #441111;
+  color: #ff5b5b;
+}
+
+.tag-info {
+  background: #113344;
+  color: #63c8ff;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-start {
+  background: #05ffb0;
+  color: #111;
+}
+
+.btn-stop {
+  background: #ff4d4d;
+}
+
+.output-box {
+  background: #0d0d0d;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  font-size: 17px;
+  min-height: 40px;
+}
