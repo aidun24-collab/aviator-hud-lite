@@ -1,102 +1,195 @@
-/* HUD PRO — MAIN STYLE */
+/* ---------- GLOBAL ---------- */
 
-/* Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  background: #0a0a0a;
-  color: #fff;
-  padding: 20px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    background: radial-gradient(circle at top, #161b2b 0, #05060a 55%, #000 100%);
+    color: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 20px 12px;
 }
+
+/* ---------- SHELL ---------- */
 
 .hud-shell {
-  max-width: 900px;
-  margin: auto;
+    width: 100%;
+    max-width: 480px;
+    background: linear-gradient(145deg, #090b13, #111425);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    padding: 16px 16px 18px;
 }
 
+/* ---------- HEADER ---------- */
+
 .hud-header {
-  padding: 20px 0;
-  text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .logo {
-  font-size: 30px;
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 30% 0, #ffec99, #ff3b6a);
+    box-shadow: 0 0 18px rgba(255, 59, 106, 0.55);
+    font-size: 22px;
 }
 
 .titles h1 {
-  font-size: 28px;
-  margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: 0.03em;
 }
 
-.card {
-  background: #111;
-  border-radius: 10px;
-  padding: 20px;
-  margin-top: 20px;
+.titles p {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* ---------- CARDS ---------- */
+
+.hud-card {
+    background: rgba(10, 13, 30, 0.95);
+    border-radius: 14px;
+    padding: 12px 12px 10px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.card-head h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
 }
 
 .card-caption {
-  opacity: 0.7;
-  font-size: 14px;
+    font-size: 12px;
+    opacity: 0.7;
 }
+
+/* ---------- TAGS ---------- */
 
 .tag {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
+    padding: 3px 9px;
+    font-size: 11px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
-.tag-status {
-  background: #222;
-  color: #05ffb0;
+/* default */
+.tag-status,
+.tag-momentum,
+.tag-next {
+    background: rgba(255, 255, 255, 0.05);
 }
 
-.tag-danger {
-  background: #441111;
-  color: #ff5b5b;
+/* status colors */
+.tag-status.safe {
+    background: rgba(46, 204, 113, 0.15);
+    border-color: rgba(39, 174, 96, 0.7);
+    color: #2ecc71;
+}
+.tag-status.caution {
+    background: rgba(241, 196, 15, 0.15);
+    border-color: rgba(243, 156, 18, 0.7);
+    color: #f1c40f;
+}
+.tag-status.risky {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: rgba(192, 57, 43, 0.7);
+    color: #e74c3c;
 }
 
-.tag-info {
-  background: #113344;
-  color: #63c8ff;
+/* momentum colors */
+.tag-momentum.hot {
+    background: rgba(231, 76, 60, 0.16);
+    border-color: rgba(231, 76, 60, 0.7);
+}
+.tag-momentum.warm {
+    background: rgba(241, 196, 15, 0.16);
+    border-color: rgba(241, 196, 15, 0.7);
+}
+.tag-momentum.neutral {
+    background: rgba(127, 140, 141, 0.16);
+    border-color: rgba(149, 165, 166, 0.7);
+}
+.tag-momentum.cold {
+    background: rgba(52, 152, 219, 0.16);
+    border-color: rgba(41, 128, 185, 0.7);
 }
 
-.btn {
-  width: 100%;
-  padding: 12px;
-  margin-top: 15px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
+/* next multiplier colors */
+.tag-next.low {
+    background: rgba(231, 76, 60, 0.16);
+    border-color: rgba(231, 76, 60, 0.7);
+}
+.tag-next.mid {
+    background: rgba(241, 196, 15, 0.16);
+    border-color: rgba(241, 196, 15, 0.7);
+}
+.tag-next.high {
+    background: rgba(46, 204, 113, 0.16);
+    border-color: rgba(46, 204, 113, 0.7);
 }
 
-.btn-start {
-  background: #05ffb0;
-  color: #111;
+/* ---------- HISTORY LIST ---------- */
+
+.list {
+    list-style: none;
+    margin-top: 4px;
+    font-size: 12px;
+    max-height: 180px;
+    overflow-y: auto;
 }
 
-.btn-stop {
-  background: #ff4d4d;
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
 }
 
-.output-box {
-  background: #0d0d0d;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 10px;
-  font-size: 17px;
-  min-height: 40px;
+.list-item span:first-child {
+    opacity: 0.7;
+}
+
+.list-item span:last-child {
+    font-weight: 600;
+}
+
+/* ---------- FOOTER ---------- */
+
+.hud-footer {
+    margin-top: 8px;
+    font-size: 10px;
+    opacity: 0.55;
+    text-align: center;
+    line-height: 1.4;
 }
