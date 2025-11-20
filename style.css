@@ -261,3 +261,43 @@ body {
 .error-bar.hidden {
     top: -60px;                /* Slides back up */
 }
+/* Download Template Button */
+#downloadTemplateBtn {
+    background: #3a6df0;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: 0.2s;
+}
+
+#downloadTemplateBtn:hover {
+    background: #345ed0;
+}
+
+#downloadTemplateBtn:active {
+    transform: scale(0.97);
+}
+/* Load CSV Button */
+#loadCsvBtn {
+    background: #4b8bf4;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: 0.2s;
+}
+
+#loadCsvBtn:hover {
+    background: #3a78e0;
+}
+
+#loadCsvBtn:active {
+    transform: scale(0.97);
+}
