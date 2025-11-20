@@ -14,30 +14,34 @@
             <div class="logo">✈️</div>
             <div class="titles">
                 <h1>Aviator HUD Pro</h1>
-                <p>Automated monitor for momentum, status & next crash estimate</p>
+                <p>Automated monitor powered by your CSV data</p>
             </div>
         </header>
+
+        <!-- CSV UPLOAD -->
+        <section class="hud-card upload-box">
+            <h2>Import Aviator CSV</h2>
+            <input type="file" id="csvFile" accept=".csv" />
+            <button id="loadCsvBtn">Load CSV</button>
+            <p class="upload-note">Upload your real Aviator rounds to power the HUD.</p>
+        </section>
 
         <!-- STATUS PANEL -->
         <section class="hud-card">
             <div class="card-head">
                 <h2>Status</h2>
-                <span class="tag tag-status" id="statusTag">Loading...</span>
+                <span class="tag tag-status" id="statusTag">WAITING</span>
             </div>
-            <p class="card-caption" id="statusCaption">
-                Fetching system signals...
-            </p>
+            <p class="card-caption" id="statusCaption">Upload CSV to analyze structure...</p>
         </section>
 
         <!-- PREDICTION PANEL -->
         <section class="hud-card">
             <div class="card-head">
                 <h2>Next Multiplier</h2>
-                <span class="tag tag-next" id="nextMulti">--</span>
+                <span class="tag tag-multi" id="nextMulti">--</span>
             </div>
-            <p class="card-caption">
-                Estimated next crash zone based on recent simulated rounds.
-            </p>
+            <p class="card-caption">Estimated trend-based next multiplier</p>
         </section>
 
         <!-- MOMENTUM PANEL -->
@@ -46,26 +50,15 @@
                 <h2>Momentum</h2>
                 <span class="tag tag-momentum" id="momentumTag">--</span>
             </div>
-            <p class="card-caption" id="momentumCaption">
-                Analyzing last waves...
-            </p>
+            <p class="card-caption" id="momentumCaption">Momentum will appear after CSV load...</p>
         </section>
 
         <!-- HISTORY PANEL -->
         <section class="hud-card">
-            <div class="card-head">
-                <h2>Last 10 Simulated Rounds</h2>
-            </div>
+            <h2>Last 10 Rounds</h2>
             <ul class="list" id="historyList"></ul>
         </section>
 
-        <!-- FOOTER / LEGAL -->
-        <footer class="hud-footer">
-            <p>
-                Training tool only – does not connect to any betting site and does not
-                predict real Aviator outcomes.
-            </p>
-        </footer>
     </div>
 
     <script src="data.js"></script>
