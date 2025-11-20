@@ -235,3 +235,29 @@ body {
 .csv-upload button:hover {
     background: #ff6b6d;
 }
+/* ===============================
+   ERROR BAR (Option D)
+   =============================== */
+.error-bar {
+    position: fixed;
+    top: -60px;                /* Hidden above the screen */
+    left: 0;
+    width: 100%;
+    background: #ff3b3b;
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    transition: top 0.35s ease-in-out;   /* Nice slide animation */
+    z-index: 9999;
+}
+
+.error-bar.show {
+    top: 0;                    /* Slides down into view */
+}
+
+.error-bar.hidden {
+    top: -60px;                /* Slides back up */
+}
