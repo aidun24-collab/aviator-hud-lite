@@ -7,7 +7,7 @@ document.getElementById("loadCsvBtn").addEventListener("click", () => {
     const file = fileInput.files[0];
 
     if (!file) {
-        alert("Please choose a CSV file.");
+        showError("❌ Please choose a CSV file.");
         return;
     }
 
@@ -19,7 +19,7 @@ document.getElementById("loadCsvBtn").addEventListener("click", () => {
         // 2. Validate CSV
         const check = validateCSV(text);
         if (!check.ok) {
-            alert("❌ CSV Error: " + check.msg);
+            showError("❌ CSV Error: " + check.msg);
             return;
         }
 
@@ -27,7 +27,7 @@ document.getElementById("loadCsvBtn").addEventListener("click", () => {
         const values = parseCsv(text, check.separator);
 
         if (values.length === 0) {
-            alert("❌ No valid numbers found in CSV.");
+            showError("❌ No valid numbers found in the CSV file.");
             return;
         }
 
