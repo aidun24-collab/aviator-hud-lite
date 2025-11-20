@@ -187,3 +187,26 @@ function showError(msg) {
         bar.classList.add("hidden");
     }, 3000);
 }
+//
+// ===============================
+// OPTION C — TEMPLATE CSV DOWNLOAD
+// ===============================
+document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
+    const csvContent =
+        "Round,Multiplier\n" +
+        "1,2.5\n" +
+        "2,3.1\n" +
+        "3,1.8\n" +
+        "4,4.2\n" +
+        "5,2.9\n";
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "aviator_template.csv";
+    a.click();
+
+    URL.revokeObjectURL(url);
+});
