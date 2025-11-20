@@ -168,3 +168,22 @@ function average(arr) {
     if (arr.length === 0) return 0;
     return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
+//
+// ===============================
+// 6. ERROR BAR HANDLER (Option D)
+// ===============================
+function showError(msg) {
+    const bar = document.getElementById("errorBar");
+    const text = document.getElementById("errorText");
+
+    text.textContent = msg;
+
+    bar.classList.remove("hidden");
+    bar.classList.add("show");
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        bar.classList.remove("show");
+        bar.classList.add("hidden");
+    }, 3000);
+}
