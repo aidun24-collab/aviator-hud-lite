@@ -1,0 +1,10 @@
+{
+  "app": "Aviator HUD Pro",
+  "version": "1.0.0",
+  "developer": "champ",
+  "requires": {
+    "style": "style.css",
+    "script": "script.js",
+    "data": "data.js"
+  }
+}
