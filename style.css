@@ -193,3 +193,45 @@ body {
     text-align: center;
     line-height: 1.4;
 }
+/* ---------- CSV IMPORT PANEL ---------- */
+
+.csv-panel {
+    margin-top: 20px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.csv-panel h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+.csv-upload {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.csv-upload input[type="file"] {
+    padding: 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.csv-upload button {
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #ff4d4f;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.csv-upload button:hover {
+    background: #ff6b6d;
+}
