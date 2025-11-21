@@ -439,3 +439,15 @@ body {
 .tooltip {
     z-index: 9999;
 }
+/* Tooltip Arrow */
+.tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;               /* arrow sits under the tooltip box */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: rgba(255,255,255,0.15) transparent transparent transparent;
+    backdrop-filter: blur(6px);
+}
