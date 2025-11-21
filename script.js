@@ -255,14 +255,16 @@ document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
     wrap.addEventListener("touchstart", () => {
         pressTimer = setTimeout(() => {
             // Show tooltip
-            tooltip.style.opacity = "1";
-            tooltip.style.transform = "translateX(-50%) translateY(-6px)";
-            tooltip.style.animation = "tooltipPop 0.25s ease forwards";
+            tooltip.classList.add("no-hover");  // Prevent hover animation conflict
+tooltip.style.opacity = "1";
+tooltip.style.transform = "translateX(-50%) translateY(-6px)";
+tooltip.style.animation = "tooltipPop 0.25s ease forwards";
 
             // Auto-hide after 2.5s
             setTimeout(() => {
                 tooltip.style.opacity = "0";
-                tooltip.style.transform = "translateX(-50%) translateY(0)";
+tooltip.style.transform = "translateX(-50%) translateY(0)";
+tooltip.classList.remove("no-hover"); // Restore hover when hidden
             }, 2500);
 
         }, 450); // user must hold for 450ms
