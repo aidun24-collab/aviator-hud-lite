@@ -451,3 +451,7 @@ body {
     border-color: rgba(255,255,255,0.15) transparent transparent transparent;
     backdrop-filter: blur(6px);
 }
+/* Disable hover animation when long-press is active */
+.tooltip.no-hover {
+    pointer-events: none;
+}
