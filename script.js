@@ -243,3 +243,37 @@ document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
         }, 2500);
     });
 });
+/* =========================================
+   Long-Press Tooltip Support (Mobile)
+   ========================================= */
+document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
+    let pressTimer;
+
+    const tooltip = wrap.querySelector(".tooltip");
+
+    // ----- Start pressing -----
+    wrap.addEventListener("touchstart", () => {
+        pressTimer = setTimeout(() => {
+            // Show tooltip
+            tooltip.style.opacity = "1";
+            tooltip.style.transform = "translateX(-50%) translateY(-6px)";
+            tooltip.style.animation = "tooltipPop 0.25s ease forwards";
+
+            // Auto-hide after 2.5s
+            setTimeout(() => {
+                tooltip.style.opacity = "0";
+                tooltip.style.transform = "translateX(-50%) translateY(0)";
+            }, 2500);
+
+        }, 450); // user must hold for 450ms
+    });
+
+    // ----- Cancel press if finger lifts early -----
+    wrap.addEventListener("touchend", () => {
+        clearTimeout(pressTimer);
+    });
+
+    wrap.addEventListener("touchmove", () => {
+        clearTimeout(pressTimer);
+    });
+});
