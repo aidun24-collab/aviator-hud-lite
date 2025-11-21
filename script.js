@@ -210,3 +210,16 @@ document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
 
     URL.revokeObjectURL(url);
 });
+// ===============================
+// FILE PICKER — SHOW SELECTED FILE NAME
+// ===============================
+const csvInput = document.getElementById("csvFile");
+const fileLabel = document.querySelector(".fileLabel");
+
+csvInput.addEventListener("change", () => {
+    if (csvInput.files.length > 0) {
+        fileLabel.textContent = "📄 " + csvInput.files[0].name;
+    } else {
+        fileLabel.textContent = "Choose CSV";
+    }
+});
