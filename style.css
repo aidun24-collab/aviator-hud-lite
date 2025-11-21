@@ -373,3 +373,69 @@ body {
 .fileLabel:hover::after {
     opacity: 1;
 }
+/* ===========================
+   Tooltip Styling
+   =========================== */
+
+.tooltip-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(6px);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 14px;
+    color: #fff;
+    white-space: nowrap;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+
+    transform-origin: bottom;
+}
+
+.tooltip-wrap:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-6px);
+}
+/* Tooltip Fade-in Animation */
+@keyframes tooltipPop {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.tooltip-wrap:hover .tooltip {
+    animation: tooltipPop 0.25s ease forwards;
+}
+/* Prevent tooltip from going off-screen */
+.tooltip {
+    max-width: 200px;
+    text-align: center;
+}
+
+/* Adjust tooltip for small screens */
+@media (max-width: 480px) {
+    .tooltip {
+        font-size: 13px;
+        bottom: 120%;
+        padding: 5px 8px;
+    }
+}
+/* Ensure tooltip stays above everything */
+.tooltip {
+    z-index: 9999;
+}
