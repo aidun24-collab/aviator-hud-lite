@@ -455,3 +455,11 @@ body {
 .tooltip.no-hover {
     pointer-events: none;
 }
+/* Disable hover tooltip on touch devices */
+@media (hover: none) {
+    .tooltip-wrap:hover .tooltip {
+        opacity: 0 !important;
+        transform: translateX(-50%) translateY(0) !important;
+        animation: none !important;
+    }
+}
