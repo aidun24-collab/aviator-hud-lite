@@ -31,7 +31,7 @@ document.getElementById("loadCsvBtn").addEventListener("click", () => {
             return;
         }
 
-        // 4. Update HUD
+        // 4. Update HUD with parsed values
         updateHUDFromCSV(values);
     };
 
@@ -62,7 +62,7 @@ function validateCSV(text) {
     const header = lines[0];
     const separator = header.includes(";") ? ";" : ",";
 
-    // validate all rows numeric
+    // validate all rows numeric in column 2
     for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(separator);
 
@@ -84,6 +84,7 @@ function validateCSV(text) {
 }
 
 
+
 //
 // ===============================
 // 3. PARSE CSV → extract numeric multipliers
@@ -95,21 +96,20 @@ function parseCsv(text, separator = ",") {
     for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(separator);
         const value = parseFloat(cols[1]);
-        if (!isNaN(value)) {
-            multipliers.push(value);
-        }
+        if (!isNaN(value)) multipliers.push(value);
     }
 
     return multipliers;
 }
 
 
+
 //
 // ===============================
-// 4. UPDATE HUD
+// 4. UPDATE HUD (History, Momentum, Next Multiplier, Status, Patterns)
 // ===============================
 function updateHUDFromCSV(rounds) {
-    // LAST 10 HISTORY
+    // ---------- LAST 10 HISTORY ----------
     const history = rounds.slice(-10).reverse();
     const historyList = document.getElementById("historyList");
     historyList.innerHTML = "";
@@ -121,56 +121,81 @@ function updateHUDFromCSV(rounds) {
         historyList.appendChild(li);
     });
 
-    // MOMENTUM (avg of last 10)
+    // ---------- MOMENTUM ----------
     const avg = average(history);
     const momentumTag = document.getElementById("momentumTag");
     const momentumCaption = document.getElementById("momentumCaption");
 
-    if (avg > 5) {
-        momentumTag.textContent = "HOT";
-        momentumCaption.textContent = "Strong upward momentum.";
-    } else if (avg > 2) {
-        momentumTag.textContent = "DECENT";
-        momentumCaption.textContent = "Moderate, stable waves.";
+    let momentumLabel = "";
+    let momentumClass = "";
+    let momentumText = "";
+
+    if (avg >= 5) {
+        momentumLabel = "HOT";
+        momentumClass = "hot";
+        momentumText = "Strong upward momentum.";
+    } else if (avg >= 3) {
+        momentumLabel = "WARM";
+        momentumClass = "warm";
+        momentumText = "Healthy, active waves.";
+    } else if (avg >= 2) {
+        momentumLabel = "NEUTRAL";
+        momentumClass = "neutral";
+        momentumText = "Mixed momentum. Watch carefully.";
     } else {
-        momentumTag.textContent = "LOW";
-        momentumCaption.textContent = "Market is cold with low multipliers.";
+        momentumLabel = "COLD";
+        momentumClass = "cold";
+        momentumText = "Market is cold with low multipliers.";
     }
 
-    // NEXT MULTIPLIER FORECAST
+    momentumTag.textContent = momentumLabel;
+    momentumCaption.textContent = momentumText;
+    momentumTag.className = "tag tag-momentum " + momentumClass;
+
+    // ---------- NEXT MULTIPLIER FORECAST ----------
     const next = parseFloat((avg * 0.42).toFixed(2));
     const nextTag = document.getElementById("nextMulti");
 
-    nextTag.textContent = next + "x";
+    nextTag.textContent = next.toFixed(2) + "x";
 
-    // Remove old classes
-    nextTag.classList.remove("low", "mid", "high");
-
-    // Apply color logic
+    // Remove old classes and apply new color band
+    let bandClass = "";
     if (next <= 1.5) {
-        nextTag.classList.add("low");
+        bandClass = "low";
     } else if (next <= 3) {
-        nextTag.classList.add("mid");
+        bandClass = "mid";
     } else {
-        nextTag.classList.add("high");
+        bandClass = "high";
     }
+    nextTag.className = "tag tag-next " + bandClass;
 
-    // STATUS TAG
+    // ---------- STATUS TAG ----------
     const statusTag = document.getElementById("statusTag");
     const statusCaption = document.getElementById("statusCaption");
 
+    let statusLabel = "";
+    let statusClass = "";
+    let statusText = "";
+
     if (avg > 6) {
-        statusTag.textContent = "FAVORABLE";
-        statusCaption.textContent = "Good helpers + high waves.";
+        statusLabel = "FAVORABLE";
+        statusClass = "safe";
+        statusText = "Good helpers + high waves.";
     } else if (avg > 2.5) {
-        statusTag.textContent = "NEUTRAL";
-        statusCaption.textContent = "Mixed structure. Trade carefully.";
+        statusLabel = "NEUTRAL";
+        statusClass = "caution";
+        statusText = "Mixed structure. Trade carefully.";
     } else {
-        statusTag.textContent = "WEAK";
-        statusCaption.textContent = "Cold structure. Avoid big risks.";
+        statusLabel = "WEAK";
+        statusClass = "risky";
+        statusText = "Cold structure. Avoid big risks.";
     }
 
-    // PATTERN SCANNER (uses v2.0 logic below)
+    statusTag.textContent = statusLabel;
+    statusCaption.textContent = statusText;
+    statusTag.className = "tag tag-status " + statusClass;
+
+    // ---------- PATTERN SCANNER v2.1 ----------
     const patterns = runPatternScanner(rounds);
     const patternList = document.getElementById("patternList");
     patternList.innerHTML = "";
@@ -184,6 +209,7 @@ function updateHUDFromCSV(rounds) {
 }
 
 
+
 //
 // ===============================
 // 5. AVERAGE HELPER
@@ -194,26 +220,25 @@ function average(arr) {
 }
 
 
+
 //
 // ===============================
-// PATTERN SCANNER (v2.1 – Advanced)
+// 6. PATTERN SCANNER (v2.1 – Advanced)
 // ===============================
 function runPatternScanner(rounds) {
     const last = rounds.slice(-12);   // Look at last 12 (or fewer)
     const patterns = [];
 
-    // Need at least a few rounds
     if (last.length < 3) {
         return ["Not enough data for pattern detection"];
     }
 
-    // Basic stats
     const avg = average(last);
-    const highCount = last.filter(v => v >= 5).length;
-    const lowCount  = last.filter(v => v <= 1.5).length;
-
     const first = last[0];
     const lastVal = last[last.length - 1];
+
+    const highCount = last.filter(v => v >= 5).length;
+    const lowCount  = last.filter(v => v <= 1.5).length;
 
     // ===== TREND + VOLATILITY METER =====
     const change = lastVal - first;
@@ -231,7 +256,6 @@ function runPatternScanner(rounds) {
         trendText = "Mild downtrend";
     }
 
-    // Volatility (standard deviation)
     const mean = avg;
     const variance = last.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / last.length;
     const volatility = Math.sqrt(variance);
@@ -260,7 +284,7 @@ function runPatternScanner(rounds) {
         patterns.push("❄️ Cold Streak (3+ lows ≤ 1.5x)");
     }
 
-    // ===== WAVE UP / DOWN (recent 4 rounds) =====
+    // ===== WAVE UP / DOWN (last 4 rounds) =====
     if (last.length >= 4) {
         const seg4 = last.slice(-4);
 
@@ -284,7 +308,6 @@ function runPatternScanner(rounds) {
     if (last.length >= 4) {
         const tags4 = last.slice(-4).map(tagValue).join("");
 
-        // High–Low–High–Low flip pattern
         if (tags4 === "HLHL" || tags4 === "LHLH") {
             patterns.push("↕️ Rhythm: High–Low–High–Low (flip pattern)");
         }
@@ -342,9 +365,10 @@ function runPatternScanner(rounds) {
 }
 
 
+
 //
 // ===============================
-// 6. ERROR BAR HANDLER (Option D)
+// 7. ERROR BAR HANDLER (Option D)
 // ===============================
 function showError(msg) {
     const bar = document.getElementById("errorBar");
@@ -363,9 +387,10 @@ function showError(msg) {
 }
 
 
+
 //
 // ===============================
-// OPTION C — TEMPLATE CSV DOWNLOAD
+// 8. TEMPLATE CSV DOWNLOAD (Option C)
 // ===============================
 document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
     const csvContent =
@@ -388,50 +413,53 @@ document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
 });
 
 
+
 //
 // ===============================
-// FILE PICKER — SHOW SELECTED FILE NAME
+// 9. FILE PICKER — SHOW SELECTED FILE NAME
 // ===============================
 const csvInput = document.getElementById("csvFile");
 const fileLabel = document.querySelector(".fileLabel");
 
-csvInput.addEventListener("change", () => {
-    if (csvInput.files.length > 0) {
-        fileLabel.textContent = "📄 " + csvInput.files[0].name;
-    } else {
-        fileLabel.textContent = "Choose CSV File";
-    }
-});
+if (csvInput && fileLabel) {
+    csvInput.addEventListener("change", () => {
+        if (csvInput.files.length > 0) {
+            fileLabel.textContent = "📄 " + csvInput.files[0].name;
+        } else {
+            fileLabel.textContent = "📁 Choose CSV File";
+        }
+    });
+}
 
 
-/* =========================================
-   Long-Press Tooltip Support (Mobile)
-   ========================================= */
+
+//
+// ===============================
+// 10. Long-Press Tooltip Support (Mobile)
+// ===============================
 document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
     let pressTimer;
-
     const tooltip = wrap.querySelector(".tooltip");
 
-    // ----- Start pressing -----
+    if (!tooltip) return;
+
+    // Long-press start
     wrap.addEventListener("touchstart", () => {
         pressTimer = setTimeout(() => {
-            // Show tooltip
-            tooltip.classList.add("no-hover");  // Prevent hover animation conflict
+            tooltip.classList.add("no-hover");
             tooltip.style.opacity = "1";
             tooltip.style.transform = "translateX(-50%) translateY(-6px)";
             tooltip.style.animation = "tooltipPop 0.25s ease forwards";
 
-            // Auto-hide after 2.5s
             setTimeout(() => {
                 tooltip.style.opacity = "0";
                 tooltip.style.transform = "translateX(-50%) translateY(0)";
-                tooltip.classList.remove("no-hover"); // Restore hover when hidden
+                tooltip.classList.remove("no-hover");
             }, 2500);
-
-        }, 450); // user must hold for 450ms
+        }, 450);
     });
 
-    // ----- Cancel press if finger lifts early -----
+    // Cancel if finger lifted or moved
     wrap.addEventListener("touchend", () => {
         clearTimeout(pressTimer);
     });
