@@ -485,3 +485,38 @@ body {
         animation: none !important;
     }
 }
+/* ============================
+   PATTERN SCANNER — NEW UI
+   ============================ */
+
+.pattern-card {
+    padding-top: 18px;
+}
+
+.pattern-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pattern-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pattern-icon {
+    font-size: 18px;
+}
+
+.pattern-text {
+    color: #e4e4e4;
+    line-height: 1.3;
+}
