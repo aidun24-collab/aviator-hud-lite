@@ -296,7 +296,7 @@ csvInput.addEventListener("change", () => {
     if (csvInput.files.length > 0) {
         fileLabel.textContent = "📄 " + csvInput.files[0].name;
     } else {
-        fileLabel.textContent = "Choose CSV";
+        fileLabel.textContent = "Choose CSV File";
     }
 });
 
