@@ -39,7 +39,6 @@ document.getElementById("loadCsvBtn").addEventListener("click", () => {
 });
 
 
-
 //
 // ===============================
 // 2. SAFETY CHECKER
@@ -85,7 +84,6 @@ function validateCSV(text) {
 }
 
 
-
 //
 // ===============================
 // 3. PARSE CSV → extract numeric multipliers
@@ -102,7 +100,6 @@ function parseCsv(text, separator = ",") {
 
     return multipliers;
 }
-
 
 
 //
@@ -139,22 +136,22 @@ function updateHUDFromCSV(rounds) {
     }
 
     // NEXT MULTIPLIER FORECAST
-const next = parseFloat((avg * 0.42).toFixed(2));
-const nextTag = document.getElementById("nextMulti");
+    const next = parseFloat((avg * 0.42).toFixed(2));
+    const nextTag = document.getElementById("nextMulti");
 
-nextTag.textContent = next + "x";
+    nextTag.textContent = next + "x";
 
-// Remove old classes
-nextTag.classList.remove("low", "mid", "high");
+    // Remove old classes
+    nextTag.classList.remove("low", "mid", "high");
 
-// Apply color logic
-if (next <= 1.5) {
-    nextTag.classList.add("low");
-} else if (next <= 3) {
-    nextTag.classList.add("mid");
-} else {
-    nextTag.classList.add("high");
-}
+    // Apply color logic
+    if (next <= 1.5) {
+        nextTag.classList.add("low");
+    } else if (next <= 3) {
+        nextTag.classList.add("mid");
+    } else {
+        nextTag.classList.add("high");
+    }
 
     // STATUS TAG
     const statusTag = document.getElementById("statusTag");
@@ -170,21 +167,20 @@ if (next <= 1.5) {
         statusTag.textContent = "WEAK";
         statusCaption.textContent = "Cold structure. Avoid big risks.";
     }
-}
-// PATTERN SCANNER (Option C)
-const patterns = scanPatterns(rounds);
-const patternList = document.getElementById("patternList");
-patternList.innerHTML = "";
 
-if (patterns.length === 0) {
-    patternList.innerHTML = "<li class='list-item'><span>No pattern detected</span></li>";
-} else {
-    patterns.forEach(p => {
-        const li = document.createElement("li");
-        li.className = "list-item";
-        li.innerHTML = `<span>${p}</span>`;
-        patternList.appendChild(li);
-    });
+    // PATTERN SCANNER — update UI
+    const patterns = runPatternScanner(rounds);
+    const patternList = document.getElementById("patternList");
+    if (patternList) {
+        patternList.innerHTML = "";
+
+        patterns.forEach(p => {
+            const li = document.createElement("li");
+            li.className = "list-item";
+            li.innerHTML = `<span>${p}</span>`;
+            patternList.appendChild(li);
+        });
+    }
 }
 
 
@@ -197,54 +193,73 @@ function average(arr) {
     return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
+
 //
 // ===============================
-// PATTERN SCANNER — OPTION C
+// PATTERN SCANNER (Improved, works with 8–12 rounds)
 // ===============================
-//
-// Detects streaks, waves, spikes, low dips, hot runs, etc.
-//
-function scanPatterns(rounds) {
-    const last = rounds.slice(-12);   // Look at last 12 rounds
+function runPatternScanner(rounds) {
+    const last = rounds.slice(-12);   // Look at last 12 (or fewer)
     const patterns = [];
+
+    if (last.length < 3) {
+        return ["Not enough data for pattern detection"];
+    }
 
     const avg = average(last);
     const highCount = last.filter(v => v >= 5).length;
     const lowCount = last.filter(v => v <= 1.5).length;
 
-    // 🔥 HOT RUN (many high rounds)
-    if (highCount >= 3) {
-        patterns.push("🔥 Hot Run (3+ highs)");
+    // 🔥 HOT RUN
+    if (highCount >= 2) {
+        patterns.push("🔥 Hot Run (2+ highs)");
     }
 
-    // ❄️ COLD RUN (many low rounds)
-    if (lowCount >= 5) {
-        patterns.push("❄️ Cold Streak (5+ lows)");
+    // ❄️ COLD RUN
+    if (lowCount >= 3) {
+        patterns.push("❄️ Cold Streak (3+ lows)");
     }
 
-    // 📈 Wave Up (steady rising)
-    if (last[0] < last[3] && last[3] < last[6] && last[6] < last[9]) {
+    // 📈 WAVE UP
+    if (
+        last.length >= 4 &&
+        last[0] < last[1] &&
+        last[1] < last[2] &&
+        last[2] < last[3]
+    ) {
         patterns.push("📈 Wave Rising");
     }
 
-    // 📉 Wave Down (steady drop)
-    if (last[0] > last[3] && last[3] > last[6] && last[6] > last[9]) {
+    // 📉 WAVE DOWN
+    if (
+        last.length >= 4 &&
+        last[0] > last[1] &&
+        last[1] > last[2] &&
+        last[2] > last[3]
+    ) {
         patterns.push("📉 Wave Dropping");
     }
 
-    // ⚡ Spike Pattern (one big boom)
-    if (last.includes(Math.max(...last)) && Math.max(...last) >= 10) {
-        patterns.push("⚡ Spike Detected (10x+)");
+    // ⚡ SPIKE
+    const maxV = Math.max(...last);
+    if (maxV >= 10) {
+        patterns.push("⚡ Spike Detected (" + maxV.toFixed(2) + "x)");
     }
 
-    // 📉 Dip Recovery (low→high bounce)
-    if (last[0] <= 1.3 && last[1] <= 1.3 && last[2] >= 2.5) {
+    // ↗️ DIP RECOVERY
+    if (
+        last.length >= 3 &&
+        last[0] <= 1.4 &&
+        last[1] <= 1.4 &&
+        last[2] >= 2.5
+    ) {
         patterns.push("↗️ Dip Recovery");
     }
 
-    return patterns;
+    return patterns.length > 0 ? patterns : ["No pattern detected"];
 }
-//
+
+
 // ===============================
 // 6. ERROR BAR HANDLER (Option D)
 // ===============================
@@ -263,42 +278,50 @@ function showError(msg) {
         bar.classList.add("hidden");
     }, 3000);
 }
-//
+
+
 // ===============================
 // OPTION C — TEMPLATE CSV DOWNLOAD
 // ===============================
-document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
-    const csvContent =
-        "Round,Multiplier\n" +
-        "1,2.5\n" +
-        "2,3.1\n" +
-        "3,1.8\n" +
-        "4,4.2\n" +
-        "5,2.9\n";
+document
+    .getElementById("downloadTemplateBtn")
+    .addEventListener("click", () => {
+        const csvContent =
+            "Round,Multiplier\n" +
+            "1,2.5\n" +
+            "2,3.1\n" +
+            "3,1.8\n" +
+            "4,4.2\n" +
+            "5,2.9\n";
 
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "aviator_template.csv";
-    a.click();
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "aviator_template.csv";
+        a.click();
 
-    URL.revokeObjectURL(url);
-});
+        URL.revokeObjectURL(url);
+    });
+
+
 // ===============================
 // FILE PICKER — SHOW SELECTED FILE NAME
 // ===============================
 const csvInput = document.getElementById("csvFile");
 const fileLabel = document.querySelector(".fileLabel");
 
-csvInput.addEventListener("change", () => {
-    if (csvInput.files.length > 0) {
-        fileLabel.textContent = "📄 " + csvInput.files[0].name;
-    } else {
-        fileLabel.textContent = "Choose CSV File";
-    }
-});
+if (csvInput && fileLabel) {
+    csvInput.addEventListener("change", () => {
+        if (csvInput.files.length > 0) {
+            fileLabel.textContent = "📄 " + csvInput.files[0].name;
+        } else {
+            fileLabel.textContent = "Choose CSV File";
+        }
+    });
+}
+
 
 /* =========================================
    Long-Press Tooltip Support (Mobile)
@@ -312,18 +335,19 @@ document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
     wrap.addEventListener("touchstart", () => {
         pressTimer = setTimeout(() => {
             // Show tooltip
-            tooltip.classList.add("no-hover");  // Prevent hover animation conflict
-tooltip.style.opacity = "1";
-tooltip.style.transform = "translateX(-50%) translateY(-6px)";
-tooltip.style.animation = "tooltipPop 0.25s ease forwards";
+            tooltip.classList.add("no-hover"); // Prevent hover animation conflict
+            tooltip.style.opacity = "1";
+            tooltip.style.transform =
+                "translateX(-50%) translateY(-6px)";
+            tooltip.style.animation = "tooltipPop 0.25s ease forwards";
 
             // Auto-hide after 2.5s
             setTimeout(() => {
                 tooltip.style.opacity = "0";
-tooltip.style.transform = "translateX(-50%) translateY(0)";
-tooltip.classList.remove("no-hover"); // Restore hover when hidden
+                tooltip.style.transform =
+                    "translateX(-50%) translateY(0)";
+                tooltip.classList.remove("no-hover"); // Restore hover
             }, 2500);
-
         }, 450); // user must hold for 450ms
     });
 
