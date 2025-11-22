@@ -195,17 +195,22 @@ function updateHUDFromCSV(rounds) {
     statusCaption.textContent = statusText;
     statusTag.className = "tag tag-status " + statusClass;
 
-    // ---------- PATTERN SCANNER v2.1 ----------
-    const patterns = runPatternScanner(rounds);
-    const patternList = document.getElementById("patternList");
-    patternList.innerHTML = "";
+    // PATTERN SCANNER (new UI)
+const patterns = runPatternScanner(rounds);
+const patternList = document.getElementById("patternList");
+patternList.innerHTML = "";
 
-    patterns.forEach(p => {
-        const li = document.createElement("li");
-        li.className = "list-item";
-        li.innerHTML = `<span>${p}</span>`;
-        patternList.appendChild(li);
-    });
+patterns.forEach(p => {
+    const li = document.createElement("li");
+    li.className = "pattern-item";
+
+    li.innerHTML = `
+        <span class="pattern-icon">${p.split(" ")[0]}</span>
+        <span class="pattern-text">${p.substring(p.indexOf(" ") + 1)}</span>
+    `;
+    
+    patternList.appendChild(li);
+});
 }
 
 
