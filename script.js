@@ -171,7 +171,21 @@ if (next <= 1.5) {
         statusCaption.textContent = "Cold structure. Avoid big risks.";
     }
 }
+// PATTERN SCANNER (Option C)
+const patterns = scanPatterns(rounds);
+const patternList = document.getElementById("patternList");
+patternList.innerHTML = "";
 
+if (patterns.length === 0) {
+    patternList.innerHTML = "<li class='list-item'><span>No pattern detected</span></li>";
+} else {
+    patterns.forEach(p => {
+        const li = document.createElement("li");
+        li.className = "list-item";
+        li.innerHTML = `<span>${p}</span>`;
+        patternList.appendChild(li);
+    });
+}
 
 
 //
