@@ -139,7 +139,7 @@ function updateHUDFromCSV(rounds) {
     }
 
     // NEXT MULTIPLIER FORECAST
-const next = (avg * 0.42).toFixed(2);
+const next = parseFloat((avg * 0.42).toFixed(2));
 const nextTag = document.getElementById("nextMulti");
 
 nextTag.textContent = next + "x";
