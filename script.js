@@ -95,7 +95,9 @@ function parseCsv(text, separator = ",") {
     for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(separator);
         const value = parseFloat(cols[1]);
-        if (!isNaN(value)) multipliers.push(value);
+        if (!isNaN(value)) {
+            multipliers.push(value);
+        }
     }
 
     return multipliers;
@@ -168,19 +170,17 @@ function updateHUDFromCSV(rounds) {
         statusCaption.textContent = "Cold structure. Avoid big risks.";
     }
 
-    // PATTERN SCANNER — update UI
+    // PATTERN SCANNER (uses v2.0 logic below)
     const patterns = runPatternScanner(rounds);
     const patternList = document.getElementById("patternList");
-    if (patternList) {
-        patternList.innerHTML = "";
+    patternList.innerHTML = "";
 
-        patterns.forEach(p => {
-            const li = document.createElement("li");
-            li.className = "list-item";
-            li.innerHTML = `<span>${p}</span>`;
-            patternList.appendChild(li);
-        });
-    }
+    patterns.forEach(p => {
+        const li = document.createElement("li");
+        li.className = "list-item";
+        li.innerHTML = `<span>${p}</span>`;
+        patternList.appendChild(li);
+    });
 }
 
 
@@ -196,70 +196,113 @@ function average(arr) {
 
 //
 // ===============================
-// PATTERN SCANNER (Improved, works with 8–12 rounds)
+// PATTERN SCANNER v2.0
+// (More sensitive, works well with 8–12 rounds)
 // ===============================
 function runPatternScanner(rounds) {
-    const last = rounds.slice(-12);   // Look at last 12 (or fewer)
+    const last = rounds.slice(-12); // up to last 12 rounds
     const patterns = [];
 
-    if (last.length < 3) {
-        return ["Not enough data for pattern detection"];
+    if (last.length < 4) {
+        return ["Not enough data for pattern detection (need ≥ 4 rounds)."];
     }
 
     const avg = average(last);
-    const highCount = last.filter(v => v >= 5).length;
-    const lowCount = last.filter(v => v <= 1.5).length;
-
-    // 🔥 HOT RUN
-    if (highCount >= 2) {
-        patterns.push("🔥 Hot Run (2+ highs)");
-    }
-
-    // ❄️ COLD RUN
-    if (lowCount >= 3) {
-        patterns.push("❄️ Cold Streak (3+ lows)");
-    }
-
-    // 📈 WAVE UP
-    if (
-        last.length >= 4 &&
-        last[0] < last[1] &&
-        last[1] < last[2] &&
-        last[2] < last[3]
-    ) {
-        patterns.push("📈 Wave Rising");
-    }
-
-    // 📉 WAVE DOWN
-    if (
-        last.length >= 4 &&
-        last[0] > last[1] &&
-        last[1] > last[2] &&
-        last[2] > last[3]
-    ) {
-        patterns.push("📉 Wave Dropping");
-    }
-
-    // ⚡ SPIKE
     const maxV = Math.max(...last);
+    const minV = Math.min(...last);
+
+    const highs = last.filter(v => v >= 5);
+    const lows = last.filter(v => v < 2);
+    const mids = last.filter(v => v >= 2 && v < 5);
+
+    // 🔥 HOT RUN (overall high activity)
+    if (highs.length >= 3) {
+        patterns.push(`🔥 Hot Run (${highs.length} highs ≥ 5x)`);
+    }
+
+    // ❄️ COLD STRETCH (lots of low rounds)
+    if (lows.length >= 4) {
+        patterns.push(`❄️ Cold Stretch (${lows.length} lows < 2x)`);
+    }
+
+    // Last 3 focused streaks
+    const last3 = last.slice(-3);
+    if (last3.every(v => v >= 5)) {
+        patterns.push("🔥🔥 High Streak (last 3 rounds ≥ 5x)");
+    }
+    if (last3.every(v => v < 2)) {
+        patterns.push("🥶 Deep Freeze (last 3 rounds < 2x)");
+    }
+
+    // Trend check: compare first 3 vs last 3
+    const headAvg = average(last.slice(0, 3));
+    const tailAvg = average(last.slice(-3));
+    const diff = tailAvg - headAvg;
+
+    if (Math.abs(diff) >= 1.2) {
+        if (diff > 0) {
+            patterns.push("📈 Trend Rising (recent rounds getting higher)");
+        } else {
+            patterns.push("📉 Trend Dropping (recent rounds getting lower)");
+        }
+    }
+
+    // Wave sequences (4-step up or down anywhere in the window)
+    for (let i = 0; i + 3 < last.length; i++) {
+        const a = last[i];
+        const b = last[i + 1];
+        const c = last[i + 2];
+        const d = last[i + 3];
+
+        if (a < b && b < c && c < d) {
+            patterns.push("🌊 Wave Up sequence (4-step climb)");
+            break;
+        }
+
+        if (a > b && b > c && c > d) {
+            patterns.push("🌊 Wave Down sequence (4-step drop)");
+            break;
+        }
+    }
+
+    // ⚡ SPIKE + cool-down
     if (maxV >= 10) {
-        patterns.push("⚡ Spike Detected (" + maxV.toFixed(2) + "x)");
+        patterns.push(`⚡ Spike (${maxV.toFixed(2)}x)`);
+        const spikeIndex = last.indexOf(maxV);
+        if (spikeIndex >= 0 && spikeIndex < last.length - 1) {
+            const afterAvg = average(last.slice(spikeIndex + 1));
+            if (afterAvg < maxV / 3) {
+                patterns.push("⚡➡️ Spike then cool-down (post-spike calm)");
+            }
+        }
     }
 
-    // ↗️ DIP RECOVERY
-    if (
-        last.length >= 3 &&
-        last[0] <= 1.4 &&
-        last[1] <= 1.4 &&
-        last[2] >= 2.5
-    ) {
-        patterns.push("↗️ Dip Recovery");
+    // ↗️ Dip → Bounce in the last 4 rounds
+    const last4 = last.slice(-4);
+    if (last4.length === 4) {
+        const localMin = Math.min(...last4);
+        const localMax = Math.max(...last4);
+        if (localMin < 1.4 && localMax >= 3) {
+            patterns.push("↗️ Dip → Bounce (recent low then strong recovery)");
+        }
     }
 
-    return patterns.length > 0 ? patterns : ["No pattern detected"];
+    // If nothing strong detected, classify the structure
+    if (patterns.length === 0) {
+        if (avg >= 3 && maxV < 8 && lows.length <= 3 && highs.length <= 3) {
+            patterns.push("😐 Balanced waves (medium, stable structure)");
+        } else if (avg < 2.2 && highs.length === 0) {
+            patterns.push("🧊 Sideways cold (mostly low values, no real spikes)");
+        } else {
+            patterns.push("🔁 Mixed structure (no dominant pattern)");
+        }
+    }
+
+    return patterns;
 }
 
 
+//
 // ===============================
 // 6. ERROR BAR HANDLER (Option D)
 // ===============================
@@ -280,47 +323,45 @@ function showError(msg) {
 }
 
 
+//
 // ===============================
 // OPTION C — TEMPLATE CSV DOWNLOAD
 // ===============================
-document
-    .getElementById("downloadTemplateBtn")
-    .addEventListener("click", () => {
-        const csvContent =
-            "Round,Multiplier\n" +
-            "1,2.5\n" +
-            "2,3.1\n" +
-            "3,1.8\n" +
-            "4,4.2\n" +
-            "5,2.9\n";
+document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
+    const csvContent =
+        "Round,Multiplier\n" +
+        "1,2.5\n" +
+        "2,3.1\n" +
+        "3,1.8\n" +
+        "4,4.2\n" +
+        "5,2.9\n";
 
-        const blob = new Blob([csvContent], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
 
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "aviator_template.csv";
-        a.click();
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "aviator_template.csv";
+    a.click();
 
-        URL.revokeObjectURL(url);
-    });
+    URL.revokeObjectURL(url);
+});
 
 
+//
 // ===============================
 // FILE PICKER — SHOW SELECTED FILE NAME
 // ===============================
 const csvInput = document.getElementById("csvFile");
 const fileLabel = document.querySelector(".fileLabel");
 
-if (csvInput && fileLabel) {
-    csvInput.addEventListener("change", () => {
-        if (csvInput.files.length > 0) {
-            fileLabel.textContent = "📄 " + csvInput.files[0].name;
-        } else {
-            fileLabel.textContent = "Choose CSV File";
-        }
-    });
-}
+csvInput.addEventListener("change", () => {
+    if (csvInput.files.length > 0) {
+        fileLabel.textContent = "📄 " + csvInput.files[0].name;
+    } else {
+        fileLabel.textContent = "Choose CSV File";
+    }
+});
 
 
 /* =========================================
@@ -335,19 +376,18 @@ document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
     wrap.addEventListener("touchstart", () => {
         pressTimer = setTimeout(() => {
             // Show tooltip
-            tooltip.classList.add("no-hover"); // Prevent hover animation conflict
+            tooltip.classList.add("no-hover");  // Prevent hover animation conflict
             tooltip.style.opacity = "1";
-            tooltip.style.transform =
-                "translateX(-50%) translateY(-6px)";
+            tooltip.style.transform = "translateX(-50%) translateY(-6px)";
             tooltip.style.animation = "tooltipPop 0.25s ease forwards";
 
             // Auto-hide after 2.5s
             setTimeout(() => {
                 tooltip.style.opacity = "0";
-                tooltip.style.transform =
-                    "translateX(-50%) translateY(0)";
-                tooltip.classList.remove("no-hover"); // Restore hover
+                tooltip.style.transform = "translateX(-50%) translateY(0)";
+                tooltip.classList.remove("no-hover"); // Restore hover when hidden
             }, 2500);
+
         }, 450); // user must hold for 450ms
     });
 
