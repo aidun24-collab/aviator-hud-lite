@@ -139,8 +139,22 @@ function updateHUDFromCSV(rounds) {
     }
 
     // NEXT MULTIPLIER FORECAST
-    const next = (avg * 0.42).toFixed(2);
-    document.getElementById("nextMulti").textContent = next + "x";
+const next = (avg * 0.42).toFixed(2);
+const nextTag = document.getElementById("nextMulti");
+
+nextTag.textContent = next + "x";
+
+// Remove old classes
+nextTag.classList.remove("low", "mid", "high");
+
+// Apply color logic
+if (next <= 1.5) {
+    nextTag.classList.add("low");
+} else if (next <= 3) {
+    nextTag.classList.add("mid");
+} else {
+    nextTag.classList.add("high");
+}
 
     // STATUS TAG
     const statusTag = document.getElementById("statusTag");
