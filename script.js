@@ -196,109 +196,149 @@ function average(arr) {
 
 //
 // ===============================
-// PATTERN SCANNER v2.0
-// (More sensitive, works well with 8–12 rounds)
+// PATTERN SCANNER (v2.1 – Advanced)
 // ===============================
 function runPatternScanner(rounds) {
-    const last = rounds.slice(-12); // up to last 12 rounds
+    const last = rounds.slice(-12);   // Look at last 12 (or fewer)
     const patterns = [];
 
-    if (last.length < 4) {
-        return ["Not enough data for pattern detection (need ≥ 4 rounds)."];
+    // Need at least a few rounds
+    if (last.length < 3) {
+        return ["Not enough data for pattern detection"];
     }
 
+    // Basic stats
     const avg = average(last);
+    const highCount = last.filter(v => v >= 5).length;
+    const lowCount  = last.filter(v => v <= 1.5).length;
+
+    const first = last[0];
+    const lastVal = last[last.length - 1];
+
+    // ===== TREND + VOLATILITY METER =====
+    const change = lastVal - first;
+
+    let trendText;
+    if (Math.abs(change) < 0.5) {
+        trendText = "Sideways / weak trend";
+    } else if (change >= 2) {
+        trendText = "Strong uptrend";
+    } else if (change >= 0.5) {
+        trendText = "Mild uptrend";
+    } else if (change <= -2) {
+        trendText = "Strong downtrend";
+    } else {
+        trendText = "Mild downtrend";
+    }
+
+    // Volatility (standard deviation)
+    const mean = avg;
+    const variance = last.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / last.length;
+    const volatility = Math.sqrt(variance);
+
+    let volText;
+    if (volatility < 1) {
+        volText = "calm market";
+    } else if (volatility < 3) {
+        volText = "normal volatility";
+    } else {
+        volText = "high volatility";
+    }
+
+    patterns.push(`📊 Trend: ${trendText} (${volText})`);
+
+    // ===== HOT & COLD RUNS =====
+    if (highCount >= 3) {
+        patterns.push("🔥 Hot Run (3 highs ≥ 5x)");
+    } else if (highCount >= 2) {
+        patterns.push("🔥 Hot Run (2 highs ≥ 5x)");
+    }
+
+    if (lowCount >= 5) {
+        patterns.push("❄️ Cold Streak (5+ lows ≤ 1.5x)");
+    } else if (lowCount >= 3) {
+        patterns.push("❄️ Cold Streak (3+ lows ≤ 1.5x)");
+    }
+
+    // ===== WAVE UP / DOWN (recent 4 rounds) =====
+    if (last.length >= 4) {
+        const seg4 = last.slice(-4);
+
+        if (seg4[0] < seg4[1] && seg4[1] < seg4[2] && seg4[2] < seg4[3]) {
+            patterns.push("📈 Wave Rising (recent rounds stepping up)");
+        }
+
+        if (seg4[0] > seg4[1] && seg4[1] > seg4[2] && seg4[2] > seg4[3]) {
+            patterns.push("📉 Wave Dropping (recent rounds stepping down)");
+        }
+    }
+
+    // Helper to tag values as H / M / L
+    const tagValue = (v) => {
+        if (v >= 5) return "H";       // High
+        if (v <= 1.5) return "L";     // Low
+        return "M";                   // Mid
+    };
+
+    // ===== RHYTHM PATTERNS (HLHL, LLH, HHL) =====
+    if (last.length >= 4) {
+        const tags4 = last.slice(-4).map(tagValue).join("");
+
+        // High–Low–High–Low flip pattern
+        if (tags4 === "HLHL" || tags4 === "LHLH") {
+            patterns.push("↕️ Rhythm: High–Low–High–Low (flip pattern)");
+        }
+    }
+
+    if (last.length >= 3) {
+        const tags3 = last.slice(-3).map(tagValue).join("");
+
+        if (tags3 === "LLH") {
+            patterns.push("⚙️ Pressure Build-up (lows then breakout high)");
+        } else if (tags3 === "HHL") {
+            patterns.push("🌙 Cooling Phase (highs then fading)");
+        }
+    }
+
+    // ===== PRESSURE BUILD-UP (many lows then mids) =====
+    if (last.length >= 5) {
+        const recent5 = last.slice(-5);
+        const recentLows = recent5.filter(v => v <= 1.5).length;
+        const recentMids = recent5.filter(v => v > 1.5 && v <= 3.5).length;
+
+        if (recentLows >= 3 && recentMids >= 1) {
+            patterns.push("⚙️ Pressure Build-up (many lows then mid waves)");
+        }
+    }
+
+    // ===== SPIKE + COOLING PHASE =====
     const maxV = Math.max(...last);
-    const minV = Math.min(...last);
+    const maxIndex = last.indexOf(maxV);
 
-    const highs = last.filter(v => v >= 5);
-    const lows = last.filter(v => v < 2);
-    const mids = last.filter(v => v >= 2 && v < 5);
-
-    // 🔥 HOT RUN (overall high activity)
-    if (highs.length >= 3) {
-        patterns.push(`🔥 Hot Run (${highs.length} highs ≥ 5x)`);
-    }
-
-    // ❄️ COLD STRETCH (lots of low rounds)
-    if (lows.length >= 4) {
-        patterns.push(`❄️ Cold Stretch (${lows.length} lows < 2x)`);
-    }
-
-    // Last 3 focused streaks
-    const last3 = last.slice(-3);
-    if (last3.every(v => v >= 5)) {
-        patterns.push("🔥🔥 High Streak (last 3 rounds ≥ 5x)");
-    }
-    if (last3.every(v => v < 2)) {
-        patterns.push("🥶 Deep Freeze (last 3 rounds < 2x)");
-    }
-
-    // Trend check: compare first 3 vs last 3
-    const headAvg = average(last.slice(0, 3));
-    const tailAvg = average(last.slice(-3));
-    const diff = tailAvg - headAvg;
-
-    if (Math.abs(diff) >= 1.2) {
-        if (diff > 0) {
-            patterns.push("📈 Trend Rising (recent rounds getting higher)");
-        } else {
-            patterns.push("📉 Trend Dropping (recent rounds getting lower)");
-        }
-    }
-
-    // Wave sequences (4-step up or down anywhere in the window)
-    for (let i = 0; i + 3 < last.length; i++) {
-        const a = last[i];
-        const b = last[i + 1];
-        const c = last[i + 2];
-        const d = last[i + 3];
-
-        if (a < b && b < c && c < d) {
-            patterns.push("🌊 Wave Up sequence (4-step climb)");
-            break;
-        }
-
-        if (a > b && b > c && c > d) {
-            patterns.push("🌊 Wave Down sequence (4-step drop)");
-            break;
-        }
-    }
-
-    // ⚡ SPIKE + cool-down
     if (maxV >= 10) {
-        patterns.push(`⚡ Spike (${maxV.toFixed(2)}x)`);
-        const spikeIndex = last.indexOf(maxV);
-        if (spikeIndex >= 0 && spikeIndex < last.length - 1) {
-            const afterAvg = average(last.slice(spikeIndex + 1));
-            if (afterAvg < maxV / 3) {
-                patterns.push("⚡➡️ Spike then cool-down (post-spike calm)");
-            }
+        patterns.push(`⚡ Spike Detected (${maxV.toFixed(2)}x)`);
+
+        const afterSpike = last.slice(maxIndex + 1);
+        if (
+            afterSpike.length >= 2 &&
+            afterSpike.every(v => v >= 1 && v <= 2.5)
+        ) {
+            patterns.push("🌙 Spike then cool-down (post-spike calm)");
         }
     }
 
-    // ↗️ Dip → Bounce in the last 4 rounds
-    const last4 = last.slice(-4);
-    if (last4.length === 4) {
-        const localMin = Math.min(...last4);
-        const localMax = Math.max(...last4);
-        if (localMin < 1.4 && localMax >= 3) {
+    // ===== DIP → BOUNCE (low → low → high) =====
+    if (last.length >= 3) {
+        const a = last[last.length - 3];
+        const b = last[last.length - 2];
+        const c = last[last.length - 1];
+
+        if (a <= 1.4 && b <= 1.4 && c >= 2.5) {
             patterns.push("↗️ Dip → Bounce (recent low then strong recovery)");
         }
     }
 
-    // If nothing strong detected, classify the structure
-    if (patterns.length === 0) {
-        if (avg >= 3 && maxV < 8 && lows.length <= 3 && highs.length <= 3) {
-            patterns.push("😐 Balanced waves (medium, stable structure)");
-        } else if (avg < 2.2 && highs.length === 0) {
-            patterns.push("🧊 Sideways cold (mostly low values, no real spikes)");
-        } else {
-            patterns.push("🔁 Mixed structure (no dominant pattern)");
-        }
-    }
-
-    return patterns;
+    return patterns.length > 0 ? patterns : ["No major pattern detected"];
 }
 
 
