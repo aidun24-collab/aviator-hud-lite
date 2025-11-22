@@ -223,26 +223,7 @@ csvInput.addEventListener("change", () => {
         fileLabel.textContent = "Choose CSV";
     }
 });
-/* ===========================
-   Tooltip Mobile Support
-   =========================== */
 
-document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
-    const tooltip = wrap.querySelector(".tooltip");
-
-    wrap.addEventListener("click", () => {
-        // Toggle tooltip visibility
-        tooltip.style.opacity = "1";
-        tooltip.style.transform = "translateX(-50%) translateY(-6px)";
-        tooltip.style.animation = "tooltipPop 0.25s ease forwards";
-
-        // Auto hide after 2.5 seconds
-        setTimeout(() => {
-            tooltip.style.opacity = "0";
-            tooltip.style.transform = "translateX(-50%) translateY(0)";
-        }, 2500);
-    });
-});
 /* =========================================
    Long-Press Tooltip Support (Mobile)
    ========================================= */
