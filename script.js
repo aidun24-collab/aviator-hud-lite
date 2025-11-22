@@ -330,7 +330,70 @@ function runPatternScanner(rounds) {
     return patterns;
 }
 
+// ===============================
+// 6B. PATTERN SCANNER v2.2 — Probability + Risk + Advice
+// ===============================
+function analyzeMarketV22(rounds) {
+    const last = rounds.slice(-12);
+    const patterns = runPatternScanner(rounds); // v2.1 patterns
 
+    if (last.length < 3) {
+        return {
+            risk: "Unknown",
+            confidence: 0,
+            advice: ["Not enough data"],
+            scoredPatterns: []
+        };
+    }
+
+    const avg = average(last);
+    const volatility = Math.sqrt(
+        last.reduce((s, v) => s + Math.pow(v - avg, 2), 0) / last.length
+    );
+
+    // ---------- RISK METER ----------
+    let risk = "";
+    if (volatility < 1) risk = "🟢 Low Risk";
+    else if (volatility < 3) risk = "🟡 Medium Risk";
+    else risk = "🔴 High Risk";
+
+    // ---------- PATTERN SCORING ----------
+    const scoredPatterns = patterns.map(p => {
+        let score = 50;
+
+        if (p.includes("Hot Run")) score += 25;
+        if (p.includes("Cold")) score -= 20;
+        if (p.includes("Spike")) score += 10;
+        if (p.includes("Wave Rising")) score += 15;
+        if (p.includes("Wave Dropping")) score -= 15;
+
+        // Adjust based on volatility
+        if (volatility > 3) score -= 10;
+        if (volatility < 1) score += 10;
+
+        score = Math.max(5, Math.min(95, score)); // clamp
+
+        return { pattern: p, confidence: score };
+    });
+
+    // ---------- CONFIDENCE METER ----------
+    let confidence =
+        (avg * 8 + (4 - volatility) * 10 + scoredPatterns.length * 5) / 3;
+    confidence = Math.max(5, Math.min(95, confidence));
+
+    // ---------- SMART ADVICE ----------
+    let advice = [];
+
+    if (volatility > 3) advice.push("Market unstable — expect swings.");
+    if (avg > 4) advice.push("High-wave bias detected.");
+    if (avg < 2) advice.push("Low-wave sequence — avoid big bets.");
+    if (last[last.length - 1] <= 1.5) advice.push("Recent dip → bounce probability rising.");
+    if (patterns.some(p => p.includes("Spike"))) advice.push("Spike occurred — next few rounds likely calm.");
+
+    if (advice.length === 0) advice.push("Stable structure detected.");
+
+    return { risk, confidence, advice, scoredPatterns };
+}
 
 //
 // ===============================
