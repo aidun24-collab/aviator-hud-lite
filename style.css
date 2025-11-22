@@ -183,7 +183,29 @@ body {
 .list-item span:last-child {
     font-weight: 600;
 }
+/* -------- PATTERN SCANNER LIST -------- */
+.pattern-list {
+    list-style: none;
+    margin-top: 4px;
+    font-size: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+}
 
+.pattern-list .list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.pattern-list .list-item span:first-child {
+    opacity: 0.7;
+}
+
+.pattern-list .list-item span:last-child {
+    font-weight: 600;
+}
 /* ---------- FOOTER ---------- */
 
 .hud-footer {
