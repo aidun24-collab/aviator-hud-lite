@@ -182,6 +182,54 @@ function average(arr) {
     if (arr.length === 0) return 0;
     return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
+
+//
+// ===============================
+// PATTERN SCANNER — OPTION C
+// ===============================
+//
+// Detects streaks, waves, spikes, low dips, hot runs, etc.
+//
+function scanPatterns(rounds) {
+    const last = rounds.slice(-12);   // Look at last 12 rounds
+    const patterns = [];
+
+    const avg = average(last);
+    const highCount = last.filter(v => v >= 5).length;
+    const lowCount = last.filter(v => v <= 1.5).length;
+
+    // 🔥 HOT RUN (many high rounds)
+    if (highCount >= 3) {
+        patterns.push("🔥 Hot Run (3+ highs)");
+    }
+
+    // ❄️ COLD RUN (many low rounds)
+    if (lowCount >= 5) {
+        patterns.push("❄️ Cold Streak (5+ lows)");
+    }
+
+    // 📈 Wave Up (steady rising)
+    if (last[0] < last[3] && last[3] < last[6] && last[6] < last[9]) {
+        patterns.push("📈 Wave Rising");
+    }
+
+    // 📉 Wave Down (steady drop)
+    if (last[0] > last[3] && last[3] > last[6] && last[6] > last[9]) {
+        patterns.push("📉 Wave Dropping");
+    }
+
+    // ⚡ Spike Pattern (one big boom)
+    if (last.includes(Math.max(...last)) && Math.max(...last) >= 10) {
+        patterns.push("⚡ Spike Detected (10x+)");
+    }
+
+    // 📉 Dip Recovery (low→high bounce)
+    if (last[0] <= 1.3 && last[1] <= 1.3 && last[2] >= 2.5) {
+        patterns.push("↗️ Dip Recovery");
+    }
+
+    return patterns;
+}
 //
 // ===============================
 // 6. ERROR BAR HANDLER (Option D)
