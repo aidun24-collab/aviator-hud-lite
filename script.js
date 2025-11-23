@@ -119,6 +119,35 @@ function updateHUDFromCSV(rounds) {
         li.className = "list-item";
         li.innerHTML = `<span>-${i + 1}</span><span>${v.toFixed(2)}x</span>`;
         historyList.appendChild(li);
+        // ===============================
+// MARKET ANALYSIS v2.2 UI UPDATE
+// ===============================
+const analysis = analyzeMarketV22(rounds);
+
+// 1. RISK LEVEL
+document.getElementById("riskLevel").textContent = analysis.risk;
+
+// 2. CONFIDENCE %
+document.getElementById("confidenceScore").textContent =
+    analysis.confidence.toFixed(0) + "%";
+
+// 3. SMART ADVICE LIST
+const adviceList = document.getElementById("adviceList");
+adviceList.innerHTML = "";
+analysis.advice.forEach(a => {
+    const li = document.createElement("li");
+    li.textContent = a;
+    adviceList.appendChild(li);
+});
+
+// 4. SCORED PATTERNS LIST
+const scoredList = document.getElementById("scoredPatternsList");
+scoredList.innerHTML = "";
+analysis.scoredPatterns.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.pattern} — ${p.confidence}%`;
+    scoredList.appendChild(li);
+});
     });
 
     // ---------- MOMENTUM ----------
