@@ -166,19 +166,19 @@ function updateHUDFromCSV(rounds) {
     }
 
     // ---------- NEXT-BIAS PREDICTION (micro-trend) ----------
-    const last = rounds.slice(-6); // last 6 rounds
-    let bias = "NEUTRAL";
+const last = rounds.slice(-6);   // last 6 rounds only
+let bias = "NEUTRAL";
 
-    if (last.length >= 3) {
-        const avg3 = average(last.slice(-3)); // last 3
-        const avg6 = average(last);           // last 6
+if (last.length >= 3) {
+    const avg3 = average(last.slice(-3)); 
+    const avg6 = average(last);
 
-        if (avg3 > avg6) bias = "UPWARD";
-        else if (avg3 < avg6) bias = "DOWNWARD";
-    }
+    if (avg3 > avg6) bias = "UPWARD";
+    else if (avg3 < avg6) bias = "DOWNWARD";
+}
 
-    const biasEl = document.getElementById("nextBias");
-    if (biasEl) biasEl.textContent = bias;
+const biasEl = document.getElementById("nextBias");
+if (biasEl) biasEl.textContent = bias;
 
     // ---------- MOMENTUM ----------
     const momentumAvg = average(history);
