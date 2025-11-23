@@ -106,7 +106,7 @@ function parseCsv(text, separator = ",") {
 
 //
 // ===============================
-// 4. UPDATE HUD (History, Momentum, Next Multiplier, Status, Patterns)
+// 4. UPDATE HUD (History, Market Brain v3.0, Bias, Momentum, Patterns)
 // ===============================
 function updateHUDFromCSV(rounds) {
     // ---------- LAST 10 HISTORY ----------
@@ -119,39 +119,69 @@ function updateHUDFromCSV(rounds) {
         li.className = "list-item";
         li.innerHTML = `<span>-${i + 1}</span><span>${v.toFixed(2)}x</span>`;
         historyList.appendChild(li);
-        // ===============================
-// MARKET ANALYSIS v2.2 UI UPDATE
-// ===============================
-const analysis = analyzeMarketV22(rounds);
-
-// 1. RISK LEVEL
-document.getElementById("riskLevel").textContent = analysis.risk;
-
-// 2. CONFIDENCE %
-document.getElementById("confidenceScore").textContent =
-    analysis.confidence.toFixed(0) + "%";
-
-// 3. SMART ADVICE LIST
-const adviceList = document.getElementById("adviceList");
-adviceList.innerHTML = "";
-analysis.advice.forEach(a => {
-    const li = document.createElement("li");
-    li.textContent = a;
-    adviceList.appendChild(li);
-});
-
-// 4. SCORED PATTERNS LIST
-const scoredList = document.getElementById("scoredPatternsList");
-scoredList.innerHTML = "";
-analysis.scoredPatterns.forEach(p => {
-    const li = document.createElement("li");
-    li.textContent = `${p.pattern} — ${p.confidence}%`;
-    scoredList.appendChild(li);
-});
     });
 
+    // ---------- PATTERN SCANNER UI ----------
+    const patterns = runPatternScanner(rounds);
+    const patternList = document.getElementById("patternList");
+    patternList.innerHTML = "";
+
+    patterns.forEach(p => {
+        const li = document.createElement("li");
+        li.className = "pattern-item";
+        li.innerHTML = `
+            <span class="pattern-icon">${p.split(" ")[0]}</span>
+            <span class="pattern-text">${p.substring(p.indexOf(" ") + 1)}</span>
+        `;
+        patternList.appendChild(li);
+    });
+
+    // ---------- MARKET ANALYSIS v3.0 ----------
+    const analysis = analyzeMarketV30(rounds);
+
+    const riskEl = document.getElementById("riskLevel");
+    const confEl = document.getElementById("confidenceScore");
+    const adviceList = document.getElementById("adviceList");
+    const scoredList = document.getElementById("scoredPatternsList");
+
+    if (riskEl) riskEl.textContent = analysis.risk;
+    if (confEl) confEl.textContent = analysis.confidence.toFixed(0) + "%";
+
+    if (adviceList) {
+        adviceList.innerHTML = "";
+        analysis.advice.forEach(a => {
+            const li = document.createElement("li");
+            li.textContent = a;
+            adviceList.appendChild(li);
+        });
+    }
+
+    if (scoredList) {
+        scoredList.innerHTML = "";
+        analysis.scoredPatterns.forEach(p => {
+            const li = document.createElement("li");
+            li.textContent = `${p.pattern} — ${p.confidence}%`;
+            scoredList.appendChild(li);
+        });
+    }
+
+    // ---------- NEXT-BIAS PREDICTION (micro-trend) ----------
+    const last = rounds.slice(-6); // last 6 rounds
+    let bias = "NEUTRAL";
+
+    if (last.length >= 3) {
+        const avg3 = average(last.slice(-3)); // last 3
+        const avg6 = average(last);           // last 6
+
+        if (avg3 > avg6) bias = "UPWARD";
+        else if (avg3 < avg6) bias = "DOWNWARD";
+    }
+
+    const biasEl = document.getElementById("nextBias");
+    if (biasEl) biasEl.textContent = bias;
+
     // ---------- MOMENTUM ----------
-    const avg = average(history);
+    const momentumAvg = average(history);
     const momentumTag = document.getElementById("momentumTag");
     const momentumCaption = document.getElementById("momentumCaption");
 
@@ -159,15 +189,15 @@ analysis.scoredPatterns.forEach(p => {
     let momentumClass = "";
     let momentumText = "";
 
-    if (avg >= 5) {
+    if (momentumAvg >= 5) {
         momentumLabel = "HOT";
         momentumClass = "hot";
         momentumText = "Strong upward momentum.";
-    } else if (avg >= 3) {
+    } else if (momentumAvg >= 3) {
         momentumLabel = "WARM";
         momentumClass = "warm";
         momentumText = "Healthy, active waves.";
-    } else if (avg >= 2) {
+    } else if (momentumAvg >= 2) {
         momentumLabel = "NEUTRAL";
         momentumClass = "neutral";
         momentumText = "Mixed momentum. Watch carefully.";
@@ -182,20 +212,16 @@ analysis.scoredPatterns.forEach(p => {
     momentumTag.className = "tag tag-momentum " + momentumClass;
 
     // ---------- NEXT MULTIPLIER FORECAST ----------
-    const next = parseFloat((avg * 0.42).toFixed(2));
+    const next = parseFloat((momentumAvg * 0.42).toFixed(2));
     const nextTag = document.getElementById("nextMulti");
 
     nextTag.textContent = next.toFixed(2) + "x";
 
-    // Remove old classes and apply new color band
     let bandClass = "";
-    if (next <= 1.5) {
-        bandClass = "low";
-    } else if (next <= 3) {
-        bandClass = "mid";
-    } else {
-        bandClass = "high";
-    }
+    if (next <= 1.5) bandClass = "low";
+    else if (next <= 3) bandClass = "mid";
+    else bandClass = "high";
+
     nextTag.className = "tag tag-next " + bandClass;
 
     // ---------- STATUS TAG ----------
@@ -206,11 +232,11 @@ analysis.scoredPatterns.forEach(p => {
     let statusClass = "";
     let statusText = "";
 
-    if (avg > 6) {
+    if (momentumAvg > 6) {
         statusLabel = "FAVORABLE";
         statusClass = "safe";
         statusText = "Good helpers + high waves.";
-    } else if (avg > 2.5) {
+    } else if (momentumAvg > 2.5) {
         statusLabel = "NEUTRAL";
         statusClass = "caution";
         statusText = "Mixed structure. Trade carefully.";
@@ -223,23 +249,6 @@ analysis.scoredPatterns.forEach(p => {
     statusTag.textContent = statusLabel;
     statusCaption.textContent = statusText;
     statusTag.className = "tag tag-status " + statusClass;
-
-    // PATTERN SCANNER (new UI)
-const patterns = runPatternScanner(rounds);
-const patternList = document.getElementById("patternList");
-patternList.innerHTML = "";
-
-patterns.forEach(p => {
-    const li = document.createElement("li");
-    li.className = "pattern-item";
-
-    li.innerHTML = `
-        <span class="pattern-icon">${p.split(" ")[0]}</span>
-        <span class="pattern-text">${p.substring(p.indexOf(" ") + 1)}</span>
-    `;
-    
-    patternList.appendChild(li);
-});
 }
 
 
@@ -267,16 +276,13 @@ function runPatternScanner(rounds) {
         return ["Not enough data for pattern detection"];
     }
 
-    // Basic stats
     const avg = average(last);
     const highCount = last.filter(v => v >= 5).length;
     const lowCount = last.filter(v => v <= 1.5).length;
     const first = last[0];
     const lastVal = last[last.length - 1];
 
-    // ================================
     // TREND + VOLATILITY
-    // ================================
     const change = lastVal - first;
 
     let trendText;
@@ -286,9 +292,7 @@ function runPatternScanner(rounds) {
     else if (change <= -2) trendText = "Strong downtrend";
     else trendText = "Mild downtrend";
 
-    // Volatility (std dev)
-    const mean = avg;
-    const variance = last.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / last.length;
+    const variance = last.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) / last.length;
     const volatility = Math.sqrt(variance);
 
     let volText;
@@ -298,18 +302,14 @@ function runPatternScanner(rounds) {
 
     patterns.push(`📊 Trend: ${trendText} (${volText})`);
 
-    // ================================
     // HOT & COLD RUNS
-    // ================================
     if (highCount >= 3) patterns.push("🔥 Hot Run (3 highs ≥ 5x)");
     else if (highCount >= 2) patterns.push("🔥 Hot Run (2 highs ≥ 5x)");
 
     if (lowCount >= 5) patterns.push("❄️ Cold Streak (5+ lows ≤ 1.5x)");
     else if (lowCount >= 3) patterns.push("❄️ Cold Streak (3+ lows ≤ 1.5x)");
 
-    // ================================
     // WAVE UP / DOWN (last 4)
-    // ================================
     if (last.length >= 4) {
         const seg4 = last.slice(-4);
         if (seg4[0] < seg4[1] && seg4[1] < seg4[2] && seg4[2] < seg4[3])
@@ -318,9 +318,7 @@ function runPatternScanner(rounds) {
             patterns.push("📉 Wave Dropping (4 decreasing)");
     }
 
-    // ================================
-    // Rhythm Patterns (H/M/L tagging)
-    // ================================
+    // Rhythm Patterns
     const tagValue = (v) => {
         if (v >= 5) return "H";
         if (v <= 1.5) return "L";
@@ -336,22 +334,17 @@ function runPatternScanner(rounds) {
 
     if (last.length >= 3) {
         const tags3 = last.slice(-3).map(tagValue).join("");
-
         if (tags3 === "LLH") patterns.push("⚙️ Pressure Build-up (LLH)");
         else if (tags3 === "HHL") patterns.push("🌙 Cooling Phase (HHL)");
     }
 
-    // ================================
     // SPIKE
-    // ================================
     const maxV = Math.max(...last);
     if (maxV >= 10) {
         patterns.push(`⚡ Spike Detected (${maxV.toFixed(2)}x)`);
     }
 
-    // ================================
     // DIP → BOUNCE
-    // ================================
     if (last.length >= 3 && last[0] <= 1.4 && last[1] <= 1.4 && last[2] >= 3) {
         patterns.push("↗️ Dip → Bounce (low → recovery)");
     }
@@ -359,12 +352,14 @@ function runPatternScanner(rounds) {
     return patterns;
 }
 
+
+
+//
 // ===============================
-// 6B. PATTERN SCANNER v2.2 — Probability + Risk + Advice
+// 7. Market Analysis Engine v3.0  (DATA ONLY)
 // ===============================
-function analyzeMarketV22(rounds) {
-    const last = rounds.slice(-12);
-    const patterns = runPatternScanner(rounds); // v2.1 patterns
+function analyzeMarketV30(rounds) {
+    const last = rounds.slice(-12); // last 12 rounds
 
     if (last.length < 3) {
         return {
@@ -376,57 +371,71 @@ function analyzeMarketV22(rounds) {
     }
 
     const avg = average(last);
-    const volatility = Math.sqrt(
-        last.reduce((s, v) => s + Math.pow(v - avg, 2), 0) / last.length
-    );
 
-    // ---------- RISK METER ----------
+    // 1. VOLATILITY (standard deviation)
+    const variance = last.reduce((s, v) => s + Math.pow(v - avg, 2), 0) / last.length;
+    const volatility = Math.sqrt(variance);
+
+    // Risk scoring
     let risk = "";
     if (volatility < 1) risk = "🟢 Low Risk";
     else if (volatility < 3) risk = "🟡 Medium Risk";
     else risk = "🔴 High Risk";
 
-    // ---------- PATTERN SCORING ----------
-    const scoredPatterns = patterns.map(p => {
+    // 2. PATTERN SCANNER (reuse v2.1)
+    const rawPatterns = runPatternScanner(rounds);
+
+    // 3. Pattern Scoring 2.0
+    const scoredPatterns = rawPatterns.map(p => {
         let score = 50;
 
-        if (p.includes("Hot Run")) score += 25;
-        if (p.includes("Cold")) score -= 20;
-        if (p.includes("Spike")) score += 10;
+        if (p.includes("Hot Run")) score += 20;
         if (p.includes("Wave Rising")) score += 15;
+        if (p.includes("Spike")) score += 10;
+
+        if (p.includes("Cold")) score -= 20;
         if (p.includes("Wave Dropping")) score -= 15;
 
-        // Adjust based on volatility
-        if (volatility > 3) score -= 10;
         if (volatility < 1) score += 10;
+        if (volatility > 3) score -= 10;
 
-        score = Math.max(5, Math.min(95, score)); // clamp
-
+        score = Math.max(5, Math.min(95, score));
         return { pattern: p, confidence: score };
     });
 
-    // ---------- CONFIDENCE METER ----------
+    // 4. Confidence Formula v3.0
     let confidence =
-        (avg * 8 + (4 - volatility) * 10 + scoredPatterns.length * 5) / 3;
+        (avg * 6 + (4 - volatility) * 12 + scoredPatterns.length * 4) / 3;
     confidence = Math.max(5, Math.min(95, confidence));
 
-    // ---------- SMART ADVICE ----------
+    // 5. AI Smart Advice v3.0
     let advice = [];
 
     if (volatility > 3) advice.push("Market unstable — expect swings.");
     if (avg > 4) advice.push("High-wave bias detected.");
-    if (avg < 2) advice.push("Low-wave sequence — avoid big bets.");
-    if (last[last.length - 1] <= 1.5) advice.push("Recent dip → bounce probability rising.");
-    if (patterns.some(p => p.includes("Spike"))) advice.push("Spike occurred — next few rounds likely calm.");
+    if (avg < 2) advice.push("Low-wave structure — avoid big risks.");
+
+    if (last[last.length - 1] <= 1.5)
+        advice.push("Recent dip → bounce probability rising.");
+
+    if (rawPatterns.some(p => p.includes("Spike")))
+        advice.push("Spike occurred — market usually cools down next rounds.");
 
     if (advice.length === 0) advice.push("Stable structure detected.");
 
-    return { risk, confidence, advice, scoredPatterns };
+    return {
+        risk,
+        confidence,
+        advice,
+        scoredPatterns
+    };
 }
+
+
 
 //
 // ===============================
-// 7. ERROR BAR HANDLER (Option D)
+// 8. ERROR BAR HANDLER
 // ===============================
 function showError(msg) {
     const bar = document.getElementById("errorBar");
@@ -437,7 +446,6 @@ function showError(msg) {
     bar.classList.remove("hidden");
     bar.classList.add("show");
 
-    // Auto-hide after 3 seconds
     setTimeout(() => {
         bar.classList.remove("show");
         bar.classList.add("hidden");
@@ -448,7 +456,7 @@ function showError(msg) {
 
 //
 // ===============================
-// 8. TEMPLATE CSV DOWNLOAD (Option C)
+// 9. TEMPLATE CSV DOWNLOAD
 // ===============================
 document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
     const csvContent =
@@ -474,7 +482,7 @@ document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
 
 //
 // ===============================
-// 9. FILE PICKER — SHOW SELECTED FILE NAME
+// 10. FILE PICKER — SHOW SELECTED FILE NAME
 // ===============================
 const csvInput = document.getElementById("csvFile");
 const fileLabel = document.querySelector(".fileLabel");
@@ -493,7 +501,7 @@ if (csvInput && fileLabel) {
 
 //
 // ===============================
-// 10. Long-Press Tooltip Support (Mobile)
+// 11. Long-Press Tooltip Support (Mobile)
 // ===============================
 document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
     let pressTimer;
@@ -501,7 +509,6 @@ document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
 
     if (!tooltip) return;
 
-    // Long-press start
     wrap.addEventListener("touchstart", () => {
         pressTimer = setTimeout(() => {
             tooltip.classList.add("no-hover");
@@ -517,7 +524,6 @@ document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
         }, 450);
     });
 
-    // Cancel if finger lifted or moved
     wrap.addEventListener("touchend", () => {
         clearTimeout(pressTimer);
     });
