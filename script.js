@@ -101,7 +101,48 @@ function parseCsv(text, separator = ",") {
 
     return multipliers;
 }
+// =========================
+// LIVE PASTE MODE (OPTION A)
+// =========================
 
+// Clean + parse live pasted text
+function parseLiveRounds(text) {
+    if (!text) return [];
+
+    // Split by newline, trim, convert to float
+    return text
+        .split(/\r?\n/)
+        .map(v => parseFloat(v.trim()))
+        .filter(v => !isNaN(v));
+}
+
+// Apply Live Rounds Button
+const applyLiveBtn = document.getElementById("applyLiveBtn");
+const liveInput = document.getElementById("liveInput");
+
+if (applyLiveBtn) {
+    applyLiveBtn.addEventListener("click", () => {
+
+        const raw = liveInput.value.trim();
+        if (!raw) {
+            showError("Paste live rounds first.");
+            return;
+        }
+
+        const rounds = parseLiveRounds(raw);
+        if (rounds.length < 5) {
+            showError("Need at least 5 valid rounds.");
+            return;
+        }
+
+        hideError();             // remove any old error
+        processData(rounds);     // 🔥 use your existing HUD engine
+
+        // Optional: add highlight effect
+        applyLiveBtn.textContent = "Applied ✔";
+        setTimeout(() => applyLiveBtn.textContent = "Apply Live Rounds", 1500);
+    });
+}
 
 
 //
