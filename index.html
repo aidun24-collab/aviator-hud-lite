@@ -8,10 +8,13 @@
 </head>
 
 <body>
-   <div id="errorBar" class="error-bar hidden">
-    ❌ <span id="errorText">Error message</span>
-</div> <div class="hud-shell">
+    <!-- Error bar (top slide-down) -->
+    <div id="errorBar" class="error-bar hidden">
+        ❌ <span id="errorText">Error message</span>
+    </div>
 
+    <div class="hud-shell">
+        <!-- HEADER -->
         <header class="hud-header">
             <div class="logo">✈️</div>
             <div class="titles">
@@ -19,64 +22,78 @@
                 <p>Automated monitor powered by your CSV data</p>
             </div>
         </header>
-<!-- =============================== -->
-<!-- LIVE PASTE MODE (OPTION A) -->
-<!-- =============================== -->
-<div class="liveBox">
-    <h3>📥 Live Rounds Paste</h3>
-    <textarea id="liveInput" rows="10" style="min-height:120px; resize:vertical; overflow:auto;"
-placeholder="Paste new rounds here..."></textarea>
-</div>
- <button id="applyLiveBtn" class="btn-primary" style="margin-top:10px;">
-    Apply Live Rounds
-</button>   
-    <!-- Auto-Replay Controls (Live v1.0 SIM) -->
-<div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
-    <button id="startReplayBtn" class="btn-secondary">▶ Start Auto-Replay</button>
-    <button id="stopReplayBtn" class="btn-secondary">⏹ Stop</button>
-</div>
-<p style="font-size:11px; opacity:0.7; margin-top:4px;">
-    Paste a long list of rounds, then use auto-replay to simulate live updates.
-</p>
-        <!-- CSV UPLOAD -->
-<section class="hud-card upload-box">
-    <h2>Import Aviator CSV</h2>
 
-    <!-- File Picker -->
-    <div class="file-picker">
-    <label for="csvFile" class="fileLabel">📁 Choose CSV File</label>
-    <input type="file" id="csvFile" accept=".csv">
-</div>
+        <!-- =============================== -->
+        <!-- LIVE PASTE MODE (OPTION A)      -->
+        <!-- =============================== -->
+        <div class="liveBox">
+            <h3>📥 Live Rounds Paste</h3>
+            <textarea
+                id="liveInput"
+                rows="10"
+                style="min-height:120px; resize:vertical; overflow:auto;"
+                placeholder="Paste new rounds here..."></textarea>
+        </div>
 
-    <!-- Upload Buttons -->
-<div class="upload-buttons">
-
-    <!-- Download Template Button -->
-    <div class="tooltip-wrap">
-        <button id="downloadTemplateBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 16l4-5h-3V4h-2v7H8z"/>
-                <path d="M20 18H4v-2h16v2z"/>
-            </svg>
-            Download CSV Template
+        <button id="applyLiveBtn" class="btn-primary" style="margin-top:10px;">
+            Apply Live Rounds
         </button>
-        <span class="tooltip">Download example CSV format</span>
-    </div>
 
-    <!-- Load CSV Button -->
-    <div class="tooltip-wrap">
-        <button id="loadCsvBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l8 8h-6v8H10v-8H4z"/>
-            </svg>
-            Load CSV
-        </button>
-        <span class="tooltip">Load your real Aviator CSV</span>
-    </div>
+        <!-- Auto-Replay Controls (Live v1.0) -->
+        <div class="replay-controls">
+            <button id="startReplayBtn" class="btn-secondary">
+                ▶ Auto-Replay
+            </button>
+            <button id="stopReplayBtn" class="btn-secondary" disabled>
+                ⏹ Stop
+            </button>
+        </div>
+        <p class="hint-text">
+            Paste a long list of rounds, then tap <strong>Auto-Replay</strong> to simulate live mode.
+        </p>
 
-</div>
+        <!-- =============================== -->
+        <!-- CSV UPLOAD                      -->
+        <!-- =============================== -->
+        <section class="hud-card upload-box">
+            <h2>Import Aviator CSV</h2>
 
-<p class="upload-note">Upload your real Aviator rounds to power the HUD.</p>
+            <!-- File Picker -->
+            <div class="file-picker">
+                <label for="csvFile" class="fileLabel">📁 Choose CSV File</label>
+                <input type="file" id="csvFile" accept=".csv" />
+            </div>
+
+            <!-- Upload Buttons -->
+            <div class="upload-buttons">
+                <!-- Download Template Button -->
+                <div class="tooltip-wrap">
+                    <button id="downloadTemplateBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 16l4-5h-3V4h-2v7H8z" />
+                            <path d="M20 18H4v-2h16v2z" />
+                        </svg>
+                        Download CSV Template
+                    </button>
+                    <span class="tooltip">Download example CSV format</span>
+                </div>
+
+                <!-- Load CSV Button -->
+                <div class="tooltip-wrap">
+                    <button id="loadCsvBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l8 8h-6v8H10v-8H4z" />
+                        </svg>
+                        Load CSV
+                    </button>
+                    <span class="tooltip">Load your real Aviator CSV</span>
+                </div>
+            </div>
+
+            <p class="upload-note">
+                Upload your real Aviator rounds to power the HUD.
+            </p>
+        </section>
 
         <!-- STATUS PANEL -->
         <section class="hud-card">
@@ -84,7 +101,9 @@ placeholder="Paste new rounds here..."></textarea>
                 <h2>Status</h2>
                 <span class="tag tag-status" id="statusTag">WAITING</span>
             </div>
-            <p class="card-caption" id="statusCaption">Upload CSV to analyze structure...</p>
+            <p class="card-caption" id="statusCaption">
+                Upload CSV or paste live rounds to analyze structure...
+            </p>
         </section>
 
         <!-- PREDICTION PANEL -->
@@ -93,7 +112,9 @@ placeholder="Paste new rounds here..."></textarea>
                 <h2>Next Multiplier</h2>
                 <span class="tag tag-next" id="nextMulti">--</span>
             </div>
-            <p class="card-caption">Estimated trend-based next multiplier</p>
+            <p class="card-caption">
+                Estimated trend-based next multiplier
+            </p>
         </section>
 
         <!-- MOMENTUM PANEL -->
@@ -102,53 +123,59 @@ placeholder="Paste new rounds here..."></textarea>
                 <h2>Momentum</h2>
                 <span class="tag tag-momentum" id="momentumTag">--</span>
             </div>
-            <p class="card-caption" id="momentumCaption">Momentum will appear after CSV load...</p>
+            <p class="card-caption" id="momentumCaption">
+                Momentum will appear after data load...
+            </p>
         </section>
-<!-- PATTERN SCANNER PANEL -->
-<section class="hud-card pattern-card">
-    <div class="card-head">
-        <h2>Pattern Scanner</h2>
-    </div>
 
-    <ul class="pattern-list" id="patternList"></ul>
-</section>
-    <!-- MARKET ANALYSIS v2.2 PANEL -->
-<section class="hud-card prob-card">
-    <div class="card-head">
-        <h2>Market Analysis v2.2</h2>
-    </div>
+        <!-- PATTERN SCANNER PANEL -->
+        <section class="hud-card pattern-card">
+            <div class="card-head">
+                <h2>Pattern Scanner</h2>
+            </div>
+            <ul class="pattern-list" id="patternList"></ul>
+        </section>
 
-    <div class="prob-section">
-        <p class="prob-label">Risk Level:</p>
-        <p class="prob-value" id="riskLevel">--</p>
-    </div>
+        <!-- MARKET ANALYSIS v2.2 PANEL -->
+        <section class="hud-card prob-card">
+            <div class="card-head">
+                <h2>Market Analysis v2.2</h2>
+            </div>
 
-    <div class="prob-section">
-        <p class="prob-label">Confidence Score:</p>
-        <p class="prob-value" id="confidenceScore">--%</p>
-    </div>
-    <div class="prob-section">
-        <p class="prob-label">Next Bias:</p>
-        <p class="prob-value" id="nextBias">--</p>
-    </div>
-    <div class="prob-section">
-        <p class="prob-label">AI Advice:</p>
-        <ul class="advice-list" id="adviceList"></ul>
-    </div>
+            <div class="prob-section">
+                <p class="prob-label">Risk Level:</p>
+                <p class="prob-value" id="riskLevel">--</p>
+            </div>
 
-    <div class="prob-section">
-        <p class="prob-label">Pattern Confidence:</p>
-        <ul class="scored-patterns" id="scoredPatternsList"></ul>
-    </div>
-</section>
+            <div class="prob-section">
+                <p class="prob-label">Confidence Score:</p>
+                <p class="prob-value" id="confidenceScore">--%</p>
+            </div>
+
+            <div class="prob-section">
+                <p class="prob-label">Next Bias:</p>
+                <p class="prob-value" id="nextBias">--</p>
+            </div>
+
+            <div class="prob-section">
+                <p class="prob-label">AI Advice:</p>
+                <ul class="advice-list" id="adviceList"></ul>
+            </div>
+
+            <div class="prob-section">
+                <p class="prob-label">Pattern Confidence:</p>
+                <ul class="scored-patterns" id="scoredPatternsList"></ul>
+            </div>
+        </section>
+
         <!-- HISTORY PANEL -->
         <section class="hud-card">
             <h2>Last 10 Rounds</h2>
             <ul class="list" id="historyList"></ul>
         </section>
-
     </div>
 
+    <!-- JS -->
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
