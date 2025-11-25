@@ -63,6 +63,80 @@ body {
     opacity: 0.7;
 }
 
+/* ---------- LIVE BOX ---------- */
+
+.liveBox {
+    background: rgba(10, 13, 30, 0.95);
+    border-radius: 14px;
+    padding: 10px 12px 12px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.liveBox h3 {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+#liveInput {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px;
+    color: #fff;
+    font-size: 13px;
+}
+
+/* ---------- BUTTONS ---------- */
+
+.btn-primary,
+.btn-secondary,
+#downloadTemplateBtn,
+#loadCsvBtn,
+.fileLabel {
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: #4b8bf4;
+    color: #fff;
+    margin-bottom: 6px;
+}
+
+.btn-primary:hover {
+    background: #3a78e0;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #eaeaea;
+}
+
+.btn-secondary:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* Auto-replay buttons container */
+.replay-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.hint-text {
+    font-size: 11px;
+    opacity: 0.7;
+    margin: 4px 0 10px;
+}
+
 /* ---------- CARDS ---------- */
 
 .hud-card {
@@ -183,6 +257,7 @@ body {
 .list-item span:last-child {
     font-weight: 600;
 }
+
 /* -------- PATTERN SCANNER LIST -------- */
 .pattern-list {
     list-style: none;
@@ -192,20 +267,26 @@ body {
     overflow-y: auto;
 }
 
-.pattern-list .list-item {
+.pattern-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 15px;
     display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
 }
 
-.pattern-list .list-item span:first-child {
-    opacity: 0.7;
+.pattern-icon {
+    font-size: 18px;
 }
 
-.pattern-list .list-item span:last-child {
-    font-weight: 600;
+.pattern-text {
+    color: #e4e4e4;
+    line-height: 1.3;
 }
+
 /* ---------- FOOTER ---------- */
 
 .hud-footer {
@@ -215,85 +296,18 @@ body {
     text-align: center;
     line-height: 1.4;
 }
+
 /* ---------- CSV IMPORT PANEL ---------- */
 
-.csv-panel {
-    margin-top: 20px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+.upload-box {
+    margin-top: 10px;
 }
 
-.csv-panel h3 {
-    font-size: 14px;
-    margin-bottom: 8px;
-    opacity: 0.9;
-}
-
-.csv-upload {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.csv-upload input[type="file"] {
-    padding: 8px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.csv-upload button {
-    padding: 10px;
-    border-radius: 6px;
-    border: none;
-    background: #ff4d4f;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.csv-upload button:hover {
-    background: #ff6b6d;
-}
-/* ===============================
-   ERROR BAR (Option D)
-   =============================== */
-.error-bar {
-    position: fixed;
-    top: -60px;                /* Hidden above the screen */
-    left: 0;
-    width: 100%;
-    background: #ff3b3b;
-    color: white;
-    padding: 12px 20px;
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    transition: top 0.35s ease-in-out;   /* Nice slide animation */
-    z-index: 9999;
-}
-
-.error-bar.show {
-    top: 0;                    /* Slides down into view */
-}
-
-.error-bar.hidden {
-    top: -60px;                /* Slides back up */
-}
 /* Download Template Button */
 #downloadTemplateBtn {
     background: #3a6df0;
     color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    font-size: 15px;
-    cursor: pointer;
     margin-right: 8px;
-    transition: 0.2s;
 }
 
 #downloadTemplateBtn:hover {
@@ -303,17 +317,12 @@ body {
 #downloadTemplateBtn:active {
     transform: scale(0.97);
 }
+
 /* Load CSV Button */
 #loadCsvBtn {
     background: #4b8bf4;
     color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    font-size: 15px;
-    cursor: pointer;
     margin-left: 6px;
-    transition: 0.2s;
 }
 
 #loadCsvBtn:hover {
@@ -323,6 +332,7 @@ body {
 #loadCsvBtn:active {
     transform: scale(0.97);
 }
+
 /* Custom File Picker */
 .file-picker {
     display: flex;
@@ -334,11 +344,6 @@ body {
 .fileLabel {
     background: #4b8bf4;
     color: white;
-    padding: 10px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: 0.2s;
 }
 
 .fileLabel:hover {
@@ -348,6 +353,7 @@ body {
 #csvFile {
     display: none;
 }
+
 /* Upload Buttons Layout */
 .upload-buttons {
     display: flex;
@@ -360,10 +366,11 @@ body {
     flex: 1;
     text-align: center;
 }
+
 /* Floating Buttons Effect */
 .upload-buttons button,
 .fileLabel {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     position: relative;
     overflow: hidden;
 }
@@ -371,13 +378,13 @@ body {
 .upload-buttons button:hover,
 .fileLabel:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .upload-buttons button:active,
 .fileLabel:active {
     transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* Subtle glow */
@@ -385,8 +392,11 @@ body {
 .fileLabel::after {
     content: "";
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.2), transparent);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent);
     opacity: 0;
     transition: 0.3s;
 }
@@ -395,6 +405,34 @@ body {
 .fileLabel:hover::after {
     opacity: 1;
 }
+
+/* ===============================
+   ERROR BAR
+   =============================== */
+.error-bar {
+    position: fixed;
+    top: -60px;
+    left: 0;
+    width: 100%;
+    background: #ff3b3b;
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transition: top 0.35s ease-in-out;
+    z-index: 9999;
+}
+
+.error-bar.show {
+    top: 0;
+}
+
+.error-bar.hidden {
+    top: -60px;
+}
+
 /* ===========================
    Tooltip Styling
    =========================== */
@@ -416,19 +454,21 @@ body {
     font-size: 14px;
     color: #fff;
     white-space: nowrap;
-
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease, transform 0.25s ease;
-
     transform-origin: bottom;
+    max-width: 200px;
+    text-align: center;
+    z-index: 9999;
 }
 
 .tooltip-wrap:hover .tooltip {
     opacity: 1;
     transform: translateX(-50%) translateY(-6px);
+    animation: tooltipPop 0.25s ease forwards;
 }
-/* Tooltip Fade-in Animation */
+
 @keyframes tooltipPop {
     0% {
         opacity: 0;
@@ -440,43 +480,23 @@ body {
     }
 }
 
-.tooltip-wrap:hover .tooltip {
-    animation: tooltipPop 0.25s ease forwards;
-}
-/* Prevent tooltip from going off-screen */
-.tooltip {
-    max-width: 200px;
-    text-align: center;
-}
-
-/* Adjust tooltip for small screens */
-@media (max-width: 480px) {
-    .tooltip {
-        font-size: 13px;
-        bottom: 120%;
-        padding: 5px 8px;
-    }
-}
-/* Ensure tooltip stays above everything */
-.tooltip {
-    z-index: 9999;
-}
 /* Tooltip Arrow */
 .tooltip::after {
     content: "";
     position: absolute;
-    top: 100%;               /* arrow sits under the tooltip box */
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     border-width: 6px;
     border-style: solid;
-    border-color: rgba(255,255,255,0.15) transparent transparent transparent;
-    backdrop-filter: blur(6px);
+    border-color: rgba(255, 255, 255, 0.15) transparent transparent transparent;
 }
+
 /* Disable hover animation when long-press is active */
 .tooltip.no-hover {
     pointer-events: none;
 }
+
 /* Disable hover tooltip on touch devices */
 @media (hover: none) {
     .tooltip-wrap:hover .tooltip {
@@ -484,41 +504,6 @@ body {
         transform: translateX(-50%) translateY(0) !important;
         animation: none !important;
     }
-}
-/* ============================
-   PATTERN SCANNER — NEW UI
-   ============================ */
-
-.pattern-card {
-    padding-top: 18px;
-}
-
-.pattern-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.pattern-item {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.pattern-icon {
-    font-size: 18px;
-}
-
-.pattern-text {
-    color: #e4e4e4;
-    line-height: 1.3;
 }
 
 /* ===============================
@@ -551,30 +536,18 @@ body {
     color: #ffffff;
 }
 
-/* Smart Advice List */
-.prob-advice {
+.advice-list,
+.scored-patterns {
     list-style: none;
-    padding: 0;
-    margin-top: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    padding-left: 0;
+    margin: 0;
 }
 
-.prob-advice li {
-    background: rgba(255, 255, 255, 0.04);
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #e4e4e4;
-    line-height: 1.3;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Emoji spacing (looks clean) */
-.prob-advice li::before {
-    content: "•";
-    color: #888;
+/* Small screen tweaks */
+@media (max-width: 480px) {
+    .tooltip {
+        font-size: 13px;
+        bottom: 120%;
+        padding: 5px 8px;
+    }
 }
