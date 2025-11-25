@@ -1,3 +1,12 @@
+// ===============================
+// Global state for Live + Replay
+// ===============================
+let lastRounds = [];        // last dataset used in HUD
+let replayTimer = null;     // setTimeout handle
+let replayData = [];        // full list used in replay
+let replayIndex = 0;        // current index in replay
+const REPLAY_DELAY = 1500;  // ms between steps
+
 //
 // ===============================
 // 1. CSV FILE → LOAD + VALIDATE + PARSE
@@ -93,7 +102,7 @@ function parseCsv(text, separator = ",") {
 
 
 // ===============================
-// 4. LIVE PASTE MODE
+// 4. LIVE PASTE MODE (manual)
 // ===============================
 function parseLiveRounds(text) {
     if (!text) return [];
@@ -125,16 +134,99 @@ if (applyLiveBtn) {
         updateHUD(rounds);
 
         applyLiveBtn.textContent = "Applied ✔";
-        setTimeout(() => applyLiveBtn.textContent = "Apply Live Rounds", 1500);
+        setTimeout(() => (applyLiveBtn.textContent = "Apply Live Rounds"), 1500);
     });
 }
 
 
 //
 // ===============================
-// 5. UPDATE HUD (Unified engine)
+// 5. AUTO-REPLAY LIVE MODE v1.0
+// ===============================
+const startReplayBtn = document.getElementById("startReplayBtn");
+const stopReplayBtn = document.getElementById("stopReplayBtn");
+
+function setReplayUI(running) {
+    if (!startReplayBtn || !stopReplayBtn) return;
+    if (running) {
+        startReplayBtn.disabled = true;
+        stopReplayBtn.disabled = false;
+        startReplayBtn.textContent = "▶ Auto-Replay (Running)";
+    } else {
+        startReplayBtn.disabled = false;
+        stopReplayBtn.disabled = true;
+        startReplayBtn.textContent = "▶ Auto-Replay";
+    }
+}
+
+function stopReplay() {
+    if (replayTimer) {
+        clearTimeout(replayTimer);
+        replayTimer = null;
+    }
+    setReplayUI(false);
+}
+
+function stepReplay() {
+    if (!replayData.length) {
+        stopReplay();
+        return;
+    }
+
+    if (replayIndex >= replayData.length) {
+        stopReplay();
+        return;
+    }
+
+    // Use rounds from 0 → replayIndex (growing history)
+    const slice = replayData.slice(0, replayIndex + 1);
+    updateHUD(slice);
+    replayIndex++;
+
+    replayTimer = setTimeout(stepReplay, REPLAY_DELAY);
+}
+
+if (startReplayBtn && stopReplayBtn) {
+    startReplayBtn.addEventListener("click", () => {
+        stopReplay(); // reset any existing timer
+
+        let data = [];
+
+        // 1) Try live textarea first
+        const raw = liveInput ? liveInput.value.trim() : "";
+        if (raw) {
+            data = parseLiveRounds(raw);
+        }
+
+        // 2) If no textarea data, fall back to lastRounds
+        if (!data.length && lastRounds.length) {
+            data = lastRounds.slice();
+        }
+
+        if (data.length < 5) {
+            showError("Need at least 5+ rounds to start auto-replay.");
+            return;
+        }
+
+        replayData = data;
+        replayIndex = 5; // start after a bit of history
+        setReplayUI(true);
+        stepReplay();
+    });
+
+    stopReplayBtn.addEventListener("click", stopReplay);
+}
+
+
+//
+// ===============================
+// 6. UPDATE HUD (Unified engine)
 // ===============================
 function updateHUD(rounds) {
+    if (!Array.isArray(rounds) || rounds.length === 0) return;
+
+    // keep copy for replay fallback
+    lastRounds = rounds.slice();
 
     // ---- HISTORY (Last 10) ----
     const history = rounds.slice(-10).reverse();
@@ -160,14 +252,15 @@ function updateHUD(rounds) {
             <span class="pattern-icon">${p.split(" ")[0]}</span>
             <span class="pattern-text">${p.substring(p.indexOf(" ") + 1)}</span>
         `;
-        patternList.appendChild(li);
+    patternList.appendChild(li);
     });
 
     // ---- MARKET ANALYSIS ----
     const analysis = analyzeMarketV30(rounds);
 
     document.getElementById("riskLevel").textContent = analysis.risk;
-    document.getElementById("confidenceScore").textContent = analysis.confidence + "%";
+    document.getElementById("confidenceScore").textContent =
+        analysis.confidence.toFixed(2) + "%";
 
     const adviceList = document.getElementById("adviceList");
     adviceList.innerHTML = "";
@@ -251,7 +344,7 @@ function updateHUD(rounds) {
 
 //
 // ===============================
-// 6. AVERAGE HELPER
+// 7. AVERAGE HELPER
 // ===============================
 function average(arr) {
     return arr.length === 0 ? 0 : arr.reduce((a, b) => a + b, 0) / arr.length;
@@ -260,7 +353,7 @@ function average(arr) {
 
 //
 // ===============================
-// 7. PATTERN SCANNER
+// 8. PATTERN SCANNER
 // ===============================
 function runPatternScanner(rounds) {
     const last = rounds.slice(-12);
@@ -288,9 +381,10 @@ function runPatternScanner(rounds) {
     const variance = last.reduce((s, v) => s + Math.pow(v - avg, 2), 0) / last.length;
     const vol = Math.sqrt(variance);
 
-    let volText = vol < 1 ? "calm market"
-                : vol < 3 ? "normal volatility"
-                : "high volatility";
+    let volText =
+        vol < 1 ? "calm market" :
+        vol < 3 ? "normal volatility" :
+        "high volatility";
 
     patterns.push(`📊 Trend: ${trend} (${volText})`);
 
@@ -311,7 +405,7 @@ function runPatternScanner(rounds) {
     }
 
     // RHYTHM
-    const tag = v => v >= 5 ? "H" : v <= 1.5 ? "L" : "M";
+    const tag = v => (v >= 5 ? "H" : v <= 1.5 ? "L" : "M");
 
     if (last.length >= 4) {
         const t = last.slice(-4).map(tag).join("");
@@ -329,7 +423,7 @@ function runPatternScanner(rounds) {
 
 //
 // ===============================
-// 8. MARKET ANALYSIS v3.0
+// 9. MARKET ANALYSIS v3.0
 // ===============================
 function analyzeMarketV30(rounds) {
     const last = rounds.slice(-12);
@@ -349,9 +443,10 @@ function analyzeMarketV30(rounds) {
     const vol = Math.sqrt(variance);
 
     // RISK
-    let risk = vol < 1 ? "🟢 Low Risk"
-            : vol < 3 ? "🟡 Medium Risk"
-            : "🔴 High Risk";
+    let risk =
+        vol < 1 ? "🟢 Low Risk" :
+        vol < 3 ? "🟡 Medium Risk" :
+        "🔴 High Risk";
 
     // RAW PATTERNS
     const raw = runPatternScanner(rounds);
@@ -386,7 +481,8 @@ function analyzeMarketV30(rounds) {
     if (avg > 4) advice.push("High-wave bias detected.");
     if (avg < 2) advice.push("Low-wave structure — avoid big risks.");
 
-    if (last[last.length - 1] <= 1.5) advice.push("Recent dip → bounce probability rising.");
+    if (last[last.length - 1] <= 1.5)
+        advice.push("Recent dip → bounce probability rising.");
 
     if (raw.some(p => p.includes("Spike")))
         advice.push("Spike occurred — market usually cools down next rounds.");
@@ -399,7 +495,7 @@ function analyzeMarketV30(rounds) {
 
 //
 // ===============================
-// 9. ERROR BAR
+// 10. ERROR BAR
 // ===============================
 function showError(msg) {
     const bar = document.getElementById("errorBar");
@@ -419,7 +515,7 @@ function showError(msg) {
 
 //
 // ===============================
-// 10. TEMPLATE CSV DOWNLOAD
+// 11. TEMPLATE CSV DOWNLOAD
 // ===============================
 document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
     const csv =
@@ -444,7 +540,7 @@ document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
 
 //
 // ===============================
-// 11. FILE PICKER — SHOW SELECTED NAME
+// 12. FILE PICKER — SHOW SELECTED NAME
 // ===============================
 const csvInput = document.getElementById("csvFile");
 const fileLabel = document.querySelector(".fileLabel");
@@ -461,7 +557,7 @@ if (csvInput && fileLabel) {
 
 //
 // ===============================
-// 12. MOBILE TOOLTIP SUPPORT
+// 13. MOBILE TOOLTIP SUPPORT
 // ===============================
 document.querySelectorAll(".tooltip-wrap").forEach(wrap => {
     let timer;
